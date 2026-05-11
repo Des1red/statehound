@@ -2,6 +2,8 @@ package statehound
 
 import (
 	"fmt"
+	"statehound/internal/statehound/collector"
+	"statehound/internal/statehound/formatter"
 	"strings"
 )
 
@@ -48,8 +50,8 @@ func (m *Manager) Hunt(target string) string {
 	return strings.Join(out, "\n")
 }
 
-func copyServices(src map[string]Service) map[string]Service {
-	out := make(map[string]Service, len(src))
+func copyServices(src map[string]collector.Service) map[string]collector.Service {
+	out := make(map[string]collector.Service, len(src))
 
 	for key, value := range src {
 		out[key] = value
@@ -58,8 +60,8 @@ func copyServices(src map[string]Service) map[string]Service {
 	return out
 }
 
-func copyPorts(src map[string]Port) map[string]Port {
-	out := make(map[string]Port, len(src))
+func copyPorts(src map[string]collector.Port) map[string]collector.Port {
+	out := make(map[string]collector.Port, len(src))
 
 	for key, value := range src {
 		out[key] = value
@@ -68,12 +70,12 @@ func copyPorts(src map[string]Port) map[string]Port {
 	return out
 }
 
-func huntServices(services map[string]Service, target string) []string {
+func huntServices(services map[string]collector.Service, target string) []string {
 	var matches []string
 
 	for name, service := range services {
 		if serviceMatchesTarget(name, target) {
-			matches = append(matches, "  "+formatService(service))
+			matches = append(matches, "  "+formatter.FormatService(service))
 		}
 	}
 
@@ -89,19 +91,19 @@ func serviceMatchesTarget(name, target string) bool {
 		strings.TrimSuffix(name, ".service") == target
 }
 
-func huntPorts(ports map[string]Port, target string) []string {
+func huntPorts(ports map[string]collector.Port, target string) []string {
 	var matches []string
 
 	for _, port := range ports {
 		if portMatchesTarget(port, target) {
-			matches = append(matches, "  "+formatPort(port))
+			matches = append(matches, "  "+formatter.FormatPort(port))
 		}
 	}
 
 	return matches
 }
 
-func portMatchesTarget(p Port, target string) bool {
+func portMatchesTarget(p collector.Port, target string) bool {
 	values := []string{
 		p.Proto,
 		p.Address,

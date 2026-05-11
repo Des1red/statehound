@@ -1,16 +1,19 @@
-package statehound
+package formatter
 
-import "fmt"
+import (
+	"fmt"
+	"statehound/internal/statehound/collector"
+)
 
-func formatServiceTransition(previous, current Service) string {
-	return formatService(current) +
+func FormatServiceTransition(previous, current collector.Service) string {
+	return FormatService(current) +
 		" transition=" +
 		previous.ActiveState + "/" + previous.SubState +
 		"->" +
 		current.ActiveState + "/" + current.SubState
 }
 
-func formatService(s Service) string {
+func FormatService(s collector.Service) string {
 	msg := s.Name
 
 	if s.Description != "" {
@@ -28,7 +31,7 @@ func formatService(s Service) string {
 	return msg
 }
 
-func formatPort(p Port) string {
+func FormatPort(p collector.Port) string {
 	msg := fmt.Sprintf("%s %s:%s", p.Proto, p.Address, p.Port)
 
 	if p.Scope != "" {

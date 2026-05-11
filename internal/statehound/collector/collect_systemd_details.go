@@ -1,4 +1,4 @@
-package statehound
+package collector
 
 import (
 	"strings"
@@ -64,7 +64,7 @@ func first(value, fallback string) string {
 	return value
 }
 
-func countActiveServices(services map[string]Service) int {
+func CountActiveServices(services map[string]Service) int {
 	count := 0
 
 	for _, service := range services {

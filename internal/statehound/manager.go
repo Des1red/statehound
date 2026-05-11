@@ -3,6 +3,10 @@ package statehound
 import (
 	"fmt"
 	"statehound/internal/logger"
+	"statehound/internal/statehound/collector"
+	"statehound/internal/statehound/diff"
+	"statehound/internal/statehound/events"
+	"statehound/internal/statehound/signals"
 	"strconv"
 	"sync"
 	"time"
@@ -12,7 +16,7 @@ type Manager struct {
 	interval time.Duration
 
 	mu       sync.RWMutex
-	previous *Snapshot
+	previous *collector.Snapshot
 	lastScan time.Time
 }
 
@@ -30,15 +34,15 @@ func (m *Manager) Run() {
 }
 
 func (m *Manager) writeStartupEvent() {
-	events := []Event{
+	evts := []events.Event{
 		{
 			Time:    time.Now(),
-			Type:    "MANAGER_STARTED",
+			Type:    signals.ManagerStarted,
 			Message: "statehound manager started",
 		},
 	}
 
-	if err := writeEvents(events); err != nil {
+	if err := events.WriteEvents(evts); err != nil {
 		logger.Failed("failed to write event", err)
 	}
 }
@@ -56,7 +60,7 @@ func (m *Manager) loop() {
 }
 
 func (m *Manager) tick() {
-	current, err := collectSnapshot()
+	current, err := collector.CollectSnapshot()
 	if err != nil {
 		logger.Failed("failed to collect snapshot", err)
 		return
@@ -72,11 +76,11 @@ func (m *Manager) tick() {
 		m.lastScan = current.Time
 		m.mu.Unlock()
 
-		activeServices := countActiveServices(current.Services)
-		events := []Event{
+		activeServices := collector.CountActiveServices(current.Services)
+		evts := []events.Event{
 			{
 				Time: time.Now(),
-				Type: "BASELINE_CREATED",
+				Type: signals.BaselineCreated,
 				Message: "baseline created with systemd_services=" +
 					strconv.Itoa(len(current.Services)) +
 					" active_services=" +
@@ -86,7 +90,7 @@ func (m *Manager) tick() {
 			},
 		}
 
-		if err := writeEvents(events); err != nil {
+		if err := events.WriteEvents(evts); err != nil {
 			logger.Failed("failed to write baseline event", err)
 		}
 
@@ -96,9 +100,9 @@ func (m *Manager) tick() {
 	m.mu.RLock()
 	previous := *m.previous
 	m.mu.RUnlock()
-	events := diffSnapshots(previous, current)
+	evts := diff.DiffSnapshots(previous, current)
 
-	if err := writeEvents(events); err != nil {
+	if err := events.WriteEvents(evts); err != nil {
 		logger.Failed("failed to write events", err)
 	}
 
@@ -121,7 +125,7 @@ func (m *Manager) Status() string {
 		m.interval,
 		m.lastScan.Format(time.RFC3339),
 		len(m.previous.Services),
-		countActiveServices(m.previous.Services),
+		collector.CountActiveServices(m.previous.Services),
 		len(m.previous.Ports),
 	)
 }

@@ -1,4 +1,4 @@
-package statehound
+package collector
 
 import (
 	"os"

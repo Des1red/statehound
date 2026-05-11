@@ -1,4 +1,4 @@
-package statehound
+package events
 
 import (
 	"fmt"

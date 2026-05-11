@@ -1,8 +1,9 @@
-package statehound
+package events
 
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"statehound/internal/model"
@@ -12,6 +13,33 @@ type Event struct {
 	Time    time.Time
 	Type    string
 	Message string
+
+	Tags []string
+}
+
+func (e *Event) Tag(tag string) {
+	tag = strings.TrimSpace(tag)
+	if tag == "" {
+		return
+	}
+
+	for _, existing := range e.Tags {
+		if existing == tag {
+			return
+		}
+	}
+
+	e.Tags = append(e.Tags, tag)
+}
+
+func (e Event) HasTag(tag string) bool {
+	for _, existing := range e.Tags {
+		if existing == tag {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (e Event) string() string {
@@ -23,7 +51,7 @@ func (e Event) string() string {
 	)
 }
 
-func writeEvents(events []Event) error {
+func WriteEvents(events []Event) error {
 	if len(events) == 0 {
 		return nil
 	}

@@ -1,8 +1,8 @@
-package statehound
+package collector
 
 import "time"
 
-func collectSnapshot() (Snapshot, error) {
+func CollectSnapshot() (Snapshot, error) {
 	services, err := collectSystemdServices()
 	if err != nil {
 		return Snapshot{}, err
