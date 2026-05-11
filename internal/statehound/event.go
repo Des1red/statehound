@@ -28,6 +28,8 @@ func writeEvents(events []Event) error {
 		return nil
 	}
 
+	cleanupEventLogIfNeeded()
+
 	file, err := os.OpenFile(model.EventPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to open event log: %w", err)

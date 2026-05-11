@@ -14,6 +14,7 @@ func VerifyInstallation() bool {
 		model.ServicePath,
 		model.ConfigDir,
 		model.LogDir,
+		model.EventBackupDir,
 		model.EventPath,
 	}
 

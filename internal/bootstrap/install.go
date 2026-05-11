@@ -89,6 +89,10 @@ func createFiles() error {
 		}
 	}
 
+	if err := os.MkdirAll(model.EventBackupDir, 0700); err != nil {
+		return fmt.Errorf("failed to create event backup directory: %w", err)
+	}
+
 	return nil
 }
 
@@ -131,6 +135,14 @@ func enforcePermissions() error {
 
 	if err := os.Chmod(model.EventPath, 0600); err != nil {
 		return fmt.Errorf("failed to set event log permissions: %w", err)
+	}
+
+	if err := os.Chown(model.EventBackupDir, 0, 0); err != nil {
+		return fmt.Errorf("failed to set event backup directory owner: %w", err)
+	}
+
+	if err := os.Chmod(model.EventBackupDir, 0600); err != nil {
+		return fmt.Errorf("failed to set event backup directory permissions: %w", err)
 	}
 
 	return nil
