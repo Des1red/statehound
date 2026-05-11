@@ -11,6 +11,8 @@ import (
 func Uninstall(purge bool) {
 	logger.Status("uninstalling statehound")
 
+	cleanupNotifierForSudoUser()
+
 	if err := command.Run("systemctl", "stop", model.ServiceName); err != nil {
 		logger.Warn("service was not running or could not be stopped")
 	}
@@ -21,6 +23,11 @@ func Uninstall(purge bool) {
 
 	if err := os.Remove(model.ServicePath); err != nil && !os.IsNotExist(err) {
 		logger.Failed("failed to remove systemd service", err)
+		return
+	}
+
+	if err := os.Remove(model.NotifierServicePath); err != nil && !os.IsNotExist(err) {
+		logger.Failed("failed to remove notifier user service", err)
 		return
 	}
 

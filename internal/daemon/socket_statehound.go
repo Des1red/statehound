@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func startSocket(path string, manager *statehound.Manager) error {
+func startControlSocket(path string, manager *statehound.Manager) error {
 	_ = os.Remove(path)
 
 	listener, err := net.Listen("unix", path)

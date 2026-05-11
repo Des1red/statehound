@@ -12,6 +12,7 @@ func VerifyInstallation() bool {
 		model.BinaryPath,
 		model.AliasPath,
 		model.ServicePath,
+		model.NotifierServicePath,
 		model.ConfigDir,
 		model.LogDir,
 		model.EventBackupDir,

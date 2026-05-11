@@ -3,11 +3,10 @@ package statehound
 import (
 	"fmt"
 	"statehound/internal/logger"
+	"statehound/internal/notify"
 	"statehound/internal/statehound/collector"
-	"statehound/internal/statehound/diff"
 	"statehound/internal/statehound/events"
 	"statehound/internal/statehound/signals"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -18,6 +17,8 @@ type Manager struct {
 	mu       sync.RWMutex
 	previous *collector.Snapshot
 	lastScan time.Time
+
+	notifications []notify.Notification
 }
 
 func NewManager(interval time.Duration) *Manager {
@@ -57,59 +58,6 @@ func (m *Manager) loop() {
 		<-ticker.C
 		m.tick()
 	}
-}
-
-func (m *Manager) tick() {
-	current, err := collector.CollectSnapshot()
-	if err != nil {
-		logger.Failed("failed to collect snapshot", err)
-		return
-	}
-
-	m.mu.RLock()
-	isBaseline := m.previous == nil
-	m.mu.RUnlock()
-
-	if isBaseline {
-		m.mu.Lock()
-		m.previous = &current
-		m.lastScan = current.Time
-		m.mu.Unlock()
-
-		activeServices := collector.CountActiveServices(current.Services)
-		evts := []events.Event{
-			{
-				Time: time.Now(),
-				Type: signals.BaselineCreated,
-				Message: "baseline created with systemd_services=" +
-					strconv.Itoa(len(current.Services)) +
-					" active_services=" +
-					strconv.Itoa(activeServices) +
-					" listening_ports=" +
-					strconv.Itoa(len(current.Ports)),
-			},
-		}
-
-		if err := events.WriteEvents(evts); err != nil {
-			logger.Failed("failed to write baseline event", err)
-		}
-
-		return
-	}
-
-	m.mu.RLock()
-	previous := *m.previous
-	m.mu.RUnlock()
-	evts := diff.DiffSnapshots(previous, current)
-
-	if err := events.WriteEvents(evts); err != nil {
-		logger.Failed("failed to write events", err)
-	}
-
-	m.mu.Lock()
-	m.lastScan = current.Time
-	m.previous = &current
-	m.mu.Unlock()
 }
 
 func (m *Manager) Status() string {

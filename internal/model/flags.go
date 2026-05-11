@@ -24,6 +24,7 @@ type CLIFlags struct {
 
 type RuntimeFlags struct {
 	Daemon  bool
+	Notify  bool
 	Verbose bool
 }
 

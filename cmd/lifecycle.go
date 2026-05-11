@@ -118,3 +118,7 @@ func hunt(target string) {
 
 	runtime.Hunt(target)
 }
+
+func notifier() {
+	runtime.Notify()
+}

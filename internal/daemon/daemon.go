@@ -14,7 +14,18 @@ func Run() {
 	manager := statehound.NewManager(5 * time.Second)
 	go manager.Run()
 
-	if err := startSocket(model.SocketPath, manager); err != nil {
+	if err := prepareRuntimeDir(); err != nil {
+		logger.Failed("failed to prepare runtime directory", err)
+		return
+	}
+
+	go func() {
+		if err := startNotifySocket(model.NotifySocketPath, manager); err != nil {
+			logger.Failed("statehound notify socket error", err)
+		}
+	}()
+
+	if err := startControlSocket(model.ControlSocketPath, manager); err != nil {
 		logger.Failed("statehound socket error", err)
 		return
 	}

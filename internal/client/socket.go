@@ -11,9 +11,17 @@ import (
 )
 
 func Send(command string) (string, error) {
-	conn, err := net.DialTimeout("unix", model.SocketPath, 2*time.Second)
+	return SendTo(model.ControlSocketPath, command)
+}
+
+func SendNotify(command string) (string, error) {
+	return SendTo(model.NotifySocketPath, command)
+}
+
+func SendTo(path, command string) (string, error) {
+	conn, err := net.DialTimeout("unix", path, 2*time.Second)
 	if err != nil {
-		return "", fmt.Errorf("failed to connect to statehound daemon: %w", err)
+		return "", fmt.Errorf("failed to connect to statehound socket %s: %w", path, err)
 	}
 	defer conn.Close()
 

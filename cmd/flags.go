@@ -30,7 +30,7 @@ func flags() model.Flags {
 	fs.StringVar(&f.CLI.Hunt, "hunt", "", "investigate a service, process, pid, or port")
 
 	fs.BoolVar(&f.Runtime.Daemon, "daemon", false, "run statehound daemon")
-
+	fs.BoolVar(&f.Runtime.Notify, "notify", false, "run statehound desktop notifier")
 	fs.BoolVar(&f.CLI.Verbose, "verbose", false, "enable verbose output")
 
 	_ = fs.Parse(os.Args[1:])
@@ -55,6 +55,8 @@ func handleFlags() {
 
 	case f.Runtime.Daemon:
 		statehoundd()
+	case f.Runtime.Notify:
+		notifier()
 
 	case f.CLI.Install:
 		install()
