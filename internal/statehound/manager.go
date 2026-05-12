@@ -69,11 +69,12 @@ func (m *Manager) Status() string {
 	}
 
 	return fmt.Sprintf(
-		"statehound daemon is running\nmanager=running\ninterval=%s\nlast_scan=%s\nsystemd_services=%d\nactive_services=%d\nlistening_ports=%d",
+		"statehound daemon is running\nmanager=running\ninterval=%s\nlast_scan=%s\nsystemd_services=%d\nactive_services=%d\nlistening_ports=%d\nwatched_files=%d",
 		m.interval,
 		m.lastScan.Format(time.RFC3339),
 		len(m.previous.Services),
 		collector.CountActiveServices(m.previous.Services),
 		len(m.previous.Ports),
+		len(m.previous.Files),
 	)
 }

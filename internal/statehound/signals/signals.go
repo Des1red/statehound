@@ -15,6 +15,10 @@ const (
 
 	ManagerStarted  = "MANAGER_STARTED"
 	BaselineCreated = "BASELINE_CREATED"
+
+	FileAdded   = "FILE_ADDED"
+	FileRemoved = "FILE_REMOVED"
+	FileChanged = "FILE_CHANGED"
 )
 
 const (
@@ -35,4 +39,9 @@ const (
 	TagServiceFailed = "service_failed"
 	TagUserUnit      = "user_unit"
 	TagSystemUnit    = "system_unit"
+
+	TagCronFile        = "cron_file"
+	TagSystemdUnitFile = "systemd_unit_file"
+	TagSSHKeysFile     = "ssh_keys_file"
+	TagPersistenceFile = "persistence_file"
 )

@@ -26,3 +26,12 @@ const (
 	MaxEventLogSizeBytes  = 5 * 1024 * 1024 // 5 MB
 	EventBackupMaxAgeDays = 30
 )
+const (
+	SystemCronFile = "/etc/crontab"
+	SystemCronDir  = "/etc/cron.d"
+
+	SystemdSystemDir = "/etc/systemd/system"
+
+	RootAuthorizedKeysGlob = "/root/.ssh/authorized_keys"
+	HomeAuthorizedKeysGlob = "/home/*/.ssh/authorized_keys"
+)

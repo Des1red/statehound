@@ -13,9 +13,15 @@ func CollectSnapshot() (Snapshot, error) {
 		return Snapshot{}, err
 	}
 
+	files, err := collectWatchedFiles()
+	if err != nil {
+		return Snapshot{}, err
+	}
+
 	return Snapshot{
 		Time:     time.Now(),
 		Services: services,
 		Ports:    ports,
+		Files:    files,
 	}, nil
 }

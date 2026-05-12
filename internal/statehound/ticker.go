@@ -2,6 +2,7 @@ package statehound
 
 import (
 	"statehound/internal/logger"
+	"statehound/internal/notify"
 	"statehound/internal/statehound/collector"
 	"statehound/internal/statehound/diff"
 	"statehound/internal/statehound/events"
@@ -37,7 +38,9 @@ func (m *Manager) tick() {
 					" active_services=" +
 					strconv.Itoa(activeServices) +
 					" listening_ports=" +
-					strconv.Itoa(len(current.Ports)),
+					strconv.Itoa(len(current.Ports)) +
+					" watched_files=" +
+					strconv.Itoa(len(current.Files)),
 			},
 		}
 
@@ -57,6 +60,18 @@ func (m *Manager) tick() {
 		logger.Failed("failed to write events", err)
 	}
 
+	// this stage should happen in filtering
+	for _, event := range evts {
+		if event.HasTag(signals.TagPersistenceFile) {
+			m.PushNotification(notify.Notification{
+				Time:    event.Time.Format(time.RFC3339),
+				Title:   "Statehound persistence change",
+				Message: event.Message,
+				Urgency: "critical",
+			})
+		}
+	}
+	////////////////////
 	m.mu.Lock()
 	m.lastScan = current.Time
 	m.previous = &current

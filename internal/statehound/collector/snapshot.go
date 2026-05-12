@@ -6,6 +6,7 @@ type Snapshot struct {
 	Time     time.Time
 	Services map[string]Service
 	Ports    map[string]Port
+	Files    map[string]FileWatch
 }
 
 type Service struct {
@@ -26,4 +27,13 @@ type Port struct {
 	PID     string
 	Exe     string
 	Cmdline string
+}
+
+type FileWatch struct {
+	Path    string
+	Exists  bool
+	Size    int64
+	Mode    string
+	ModTime time.Time
+	Hash    string
 }

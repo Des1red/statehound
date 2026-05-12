@@ -5,32 +5,6 @@ import (
 	"statehound/internal/statehound/collector"
 )
 
-func FormatServiceTransition(previous, current collector.Service) string {
-	return FormatService(current) +
-		" transition=" +
-		previous.ActiveState + "/" + previous.SubState +
-		"->" +
-		current.ActiveState + "/" + current.SubState
-}
-
-func FormatService(s collector.Service) string {
-	msg := s.Name
-
-	if s.Description != "" {
-		msg += ` desc="` + s.Description + `"`
-	}
-
-	if s.LoadState != "" {
-		msg += " load=" + s.LoadState
-	}
-
-	if s.ActiveState != "" || s.SubState != "" {
-		msg += " state=" + s.ActiveState + "/" + s.SubState
-	}
-
-	return msg
-}
-
 func FormatPort(p collector.Port) string {
 	msg := fmt.Sprintf("%s %s:%s", p.Proto, p.Address, p.Port)
 

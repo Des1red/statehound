@@ -127,3 +127,21 @@ func classifyExePath(exe string) string {
 		return "unknown"
 	}
 }
+
+func TagFileEvent(event *events.Event, file collector.FileWatch) {
+	path := strings.ToLower(file.Path)
+
+	switch {
+	case strings.Contains(path, "/cron"):
+		event.Tag(TagCronFile)
+		event.Tag(TagPersistenceFile)
+
+	case strings.Contains(path, "/systemd/system/") && strings.HasSuffix(path, ".service"):
+		event.Tag(TagSystemdUnitFile)
+		event.Tag(TagPersistenceFile)
+
+	case strings.HasSuffix(path, "/authorized_keys"):
+		event.Tag(TagSSHKeysFile)
+		event.Tag(TagPersistenceFile)
+	}
+}
