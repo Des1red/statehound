@@ -2,7 +2,6 @@ package statehound
 
 import (
 	"statehound/internal/logger"
-	"statehound/internal/notify"
 	"statehound/internal/statehound/collector"
 	"statehound/internal/statehound/diff"
 	"statehound/internal/statehound/events"
@@ -60,22 +59,17 @@ func (m *Manager) tick() {
 	m.mu.RUnlock()
 	evts := diff.DiffSnapshots(previous, current)
 
-	if err := events.WriteEvents(evts); err != nil {
+	result := applyFilters(evts)
+
+	if err := events.WriteEvents(result.LogEvents); err != nil {
 		logger.Failed("failed to write events", err)
 	}
 
-	// this stage should happen in filtering
-	for _, event := range evts {
-		if event.HasTag(signals.TagPersistenceFile) {
-			m.PushNotification(notify.Notification{
-				Time:    event.Time.Format(time.RFC3339),
-				Title:   "Statehound persistence change",
-				Message: event.Message,
-				Urgency: "critical",
-			})
-		}
+	notifications := eventsToNotifications(result.Notifications)
+	for _, n := range notifications {
+		m.PushNotification(n)
 	}
-	////////////////////
+
 	m.mu.Lock()
 	m.lastScan = current.Time
 	m.previous = &current

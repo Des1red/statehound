@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"statehound/internal/model"
+	"statehound/internal/statehound/collector"
 )
 
 type Event struct {
@@ -15,6 +16,12 @@ type Event struct {
 	Message string
 
 	Tags []string
+
+	Connection *collector.Connection // optional, only set for CONNECTION_* events
+	Process    *collector.Process    // optional, for suspicious processes
+	File       *collector.FileWatch  // optional, for FILE_* events
+	Service    *collector.Service    // optional, for SERVICE_* events
+	Port       *collector.Port       // optional, for PORT_* events
 }
 
 func (e *Event) Tag(tag string) {
