@@ -25,6 +25,17 @@ func readProcessExe(pid string) string {
 	return exe
 }
 
+func enrichConnectionProcess(c Connection) Connection {
+	if c.PID == "" {
+		return c
+	}
+
+	c.Exe = readProcessExe(c.PID)
+	c.Cmdline = readProcessCmdline(c.PID)
+
+	return c
+}
+
 func readProcessCmdline(pid string) string {
 	data, err := os.ReadFile("/proc/" + pid + "/cmdline")
 	if err != nil {

@@ -44,4 +44,25 @@ const (
 	TagSystemdUnitFile = "systemd_unit_file"
 	TagSSHKeysFile     = "ssh_keys_file"
 	TagPersistenceFile = "persistence_file"
+
+	TagOutboundConnection = "outbound_connection"
+	TagInboundConnection  = "inbound_connection"
+	TagExternalRemote     = "external_remote"
+	TagLocalRemote        = "local_remote"
+
+	TagSuspiciousProcess = "suspicious_process"
+	TagDeletedExecutable = "deleted_executable"
+	TagTempExecutable    = "temp_executable"
+	TagGoBuildExecutable = "go_build_cache_executable"
+)
+
+const (
+	ConnectionOpened = "CONNECTION_OPENED"
+	ConnectionClosed = "CONNECTION_CLOSED"
+)
+
+const (
+	SuspiciousProcessStarted = "SUSPICIOUS_PROCESS_STARTED"
+	SuspiciousProcessStopped = "SUSPICIOUS_PROCESS_STOPPED"
+	SuspiciousProcessChanged = "SUSPICIOUS_PROCESS_CHANGED"
 )

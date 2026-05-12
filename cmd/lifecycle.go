@@ -21,6 +21,7 @@ func printHelp() {
 	fmt.Println("  statehound --restart")
 	fmt.Println("  statehound --status")
 	fmt.Println("  statehound --logs")
+	fmt.Println("  statehound --snapshot")
 	fmt.Println("  statehound --events")
 	fmt.Println("  statehound --clear-events")
 	fmt.Println("  statehound --hunt sshd.service")
@@ -37,6 +38,7 @@ func printHelp() {
 	fmt.Println("      --restart         restart statehound service")
 	fmt.Println("      --status          show statehound daemon status")
 	fmt.Println("      --logs            show statehound logs")
+	fmt.Println("      --snapshot        show full current statehound snapshot")
 	fmt.Println("      --events          show statehound events")
 	fmt.Println("      --clear-events    clear statehound event log")
 	fmt.Println("      --hunt string     investigate a service, process, pid, or port")
@@ -121,4 +123,11 @@ func hunt(target string) {
 
 func notifier() {
 	runtime.Notify()
+}
+
+func snapshot() {
+	if !bootstrap.VerifyInstallation() {
+		return
+	}
+	runtime.Snapshot()
 }

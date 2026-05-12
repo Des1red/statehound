@@ -26,12 +26,24 @@ const (
 	MaxEventLogSizeBytes  = 5 * 1024 * 1024 // 5 MB
 	EventBackupMaxAgeDays = 30
 )
+
 const (
 	SystemCronFile = "/etc/crontab"
 	SystemCronDir  = "/etc/cron.d"
 
-	SystemdSystemDir = "/etc/systemd/system"
+	SystemdSystemDir     = "/etc/systemd/system"
+	SystemdUserGlobalDir = "/etc/systemd/user"
+
+	XDGAutostartDir = "/etc/xdg/autostart"
 
 	RootAuthorizedKeysGlob = "/root/.ssh/authorized_keys"
 	HomeAuthorizedKeysGlob = "/home/*/.ssh/authorized_keys"
+
+	HomeUserSystemdGlob = "/home/*/.config/systemd/user/*.service"
+	HomeAutostartGlob   = "/home/*/.config/autostart/*.desktop"
+	HomeBashrcGlob      = "/home/*/.bashrc"
+	HomeProfileGlob     = "/home/*/.profile"
+	HomeZshrcGlob       = "/home/*/.zshrc"
+	RootBashrc          = "/root/.bashrc"
+	RootProfile         = "/root/.profile"
 )

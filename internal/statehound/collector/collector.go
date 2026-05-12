@@ -18,10 +18,22 @@ func CollectSnapshot() (Snapshot, error) {
 		return Snapshot{}, err
 	}
 
+	connections, err := collectOutboundConnections()
+	if err != nil {
+		return Snapshot{}, err
+	}
+
+	processes, err := collectSuspiciousProcesses()
+	if err != nil {
+		return Snapshot{}, err
+	}
+
 	return Snapshot{
-		Time:     time.Now(),
-		Services: services,
-		Ports:    ports,
-		Files:    files,
+		Time:                time.Now(),
+		Services:            services,
+		Ports:               ports,
+		Files:               files,
+		Connections:         connections,
+		SuspiciousProcesses: processes,
 	}, nil
 }

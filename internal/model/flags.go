@@ -8,14 +8,14 @@ type CLIFlags struct {
 	Uninstall bool
 	Purge     bool
 
-	Start   bool
-	Stop    bool
-	Restart bool
-	Status  bool
-	Logs    bool
-	Events  bool
-
-	Hunt string
+	Start    bool
+	Stop     bool
+	Restart  bool
+	Status   bool
+	Logs     bool
+	Events   bool
+	Snapshot bool
+	Hunt     string
 
 	ClearEvents bool
 

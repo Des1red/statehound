@@ -28,10 +28,25 @@ func watchedFilePaths() []string {
 	paths = append(paths, model.SystemCronFile)
 
 	paths = appendGlob(paths, model.SystemCronDir+"/*")
+
 	paths = appendGlob(paths, model.SystemdSystemDir+"/*.service")
+	paths = appendGlob(paths, model.SystemdSystemDir+"/*.timer")
+	paths = appendGlob(paths, model.SystemdSystemDir+"/*.socket")
+	paths = appendGlob(paths, model.SystemdSystemDir+"/*.d/*.conf")
+
+	paths = appendGlob(paths, model.SystemdUserGlobalDir+"/*.service")
+	paths = appendGlob(paths, model.HomeUserSystemdGlob)
+
+	paths = appendGlob(paths, model.XDGAutostartDir+"/*.desktop")
+	paths = appendGlob(paths, model.HomeAutostartGlob)
+
 	paths = appendGlob(paths, model.RootAuthorizedKeysGlob)
 	paths = appendGlob(paths, model.HomeAuthorizedKeysGlob)
 
+	paths = append(paths, model.RootBashrc, model.RootProfile)
+	paths = appendGlob(paths, model.HomeBashrcGlob)
+	paths = appendGlob(paths, model.HomeProfileGlob)
+	paths = appendGlob(paths, model.HomeZshrcGlob)
 	return paths
 }
 

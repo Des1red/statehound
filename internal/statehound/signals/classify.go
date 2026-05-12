@@ -145,3 +145,48 @@ func TagFileEvent(event *events.Event, file collector.FileWatch) {
 		event.Tag(TagPersistenceFile)
 	}
 }
+
+func TagConnectionEvent(event *events.Event, conn collector.Connection) {
+	event.Tag(TagOutboundConnection)
+
+	remote := strings.ToLower(conn.RemoteAddress)
+
+	switch remote {
+	case "127.0.0.1", "localhost", "::1":
+		event.Tag(TagLocalRemote)
+	default:
+		event.Tag(TagExternalRemote)
+	}
+
+	process := strings.ToLower(conn.Process)
+	exe := strings.ToLower(conn.Exe)
+	cmd := strings.ToLower(conn.Cmdline)
+
+	if isShellTool(process, exe, cmd) {
+		event.Tag(TagShellTool)
+	}
+
+	switch classifyExePath(exe) {
+	case "system":
+		event.Tag(TagSystemBinary)
+	case "user":
+		event.Tag(TagUserBinary)
+	case "temp":
+		event.Tag(TagTempBinary)
+	default:
+		event.Tag(TagUnknownBinary)
+	}
+}
+
+func TagProcessEvent(event *events.Event, process collector.Process) {
+	event.Tag(TagSuspiciousProcess)
+
+	switch process.Reason {
+	case "deleted_executable":
+		event.Tag(TagDeletedExecutable)
+	case "temp_executable":
+		event.Tag(TagTempExecutable)
+	case "go_build_cache_executable":
+		event.Tag(TagGoBuildExecutable)
+	}
+}

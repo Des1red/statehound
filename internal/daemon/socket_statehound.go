@@ -55,6 +55,8 @@ func handleConnection(conn net.Conn, manager *statehound.Manager) {
 		writeResponse(conn, "PONG")
 	case msg == "STATUS":
 		writeResponse(conn, manager.Status())
+	case msg == "SNAPSHOT":
+		writeResponse(conn, manager.Snapshot())
 	case strings.HasPrefix(msg, "HUNT "):
 		target := strings.TrimSpace(strings.TrimPrefix(msg, "HUNT "))
 		writeResponse(conn, manager.Hunt(target))

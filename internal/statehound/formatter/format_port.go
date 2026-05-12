@@ -30,13 +30,3 @@ func FormatPort(p collector.Port) string {
 
 	return msg
 }
-
-func shortCmdline(s string) string {
-	const max = 160
-
-	if len(s) <= max {
-		return s
-	}
-
-	return s[:max] + "..."
-}

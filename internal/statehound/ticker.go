@@ -40,7 +40,11 @@ func (m *Manager) tick() {
 					" listening_ports=" +
 					strconv.Itoa(len(current.Ports)) +
 					" watched_files=" +
-					strconv.Itoa(len(current.Files)),
+					strconv.Itoa(len(current.Files)) +
+					" outbound_connections=" +
+					strconv.Itoa(len(current.Connections)) +
+					" suspicious_processes=" +
+					strconv.Itoa(len(current.SuspiciousProcesses)),
 			},
 		}
 
