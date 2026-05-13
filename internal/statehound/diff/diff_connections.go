@@ -15,9 +15,10 @@ func diffConnections(previous, current map[string]collector.Connection) []events
 	for key, conn := range current {
 		if _, existed := previous[key]; !existed {
 			event := events.Event{
-				Time:    time.Now(),
-				Type:    signals.ConnectionOpened,
-				Message: formatter.FormatConnection(conn),
+				Time:       time.Now(),
+				Type:       signals.ConnectionOpened,
+				Message:    formatter.FormatConnection(conn),
+				Connection: &conn,
 			}
 
 			signals.TagConnectionEvent(&event, conn)
@@ -29,9 +30,10 @@ func diffConnections(previous, current map[string]collector.Connection) []events
 	for key, conn := range previous {
 		if _, exists := current[key]; !exists {
 			event := events.Event{
-				Time:    time.Now(),
-				Type:    signals.ConnectionClosed,
-				Message: formatter.FormatConnection(conn),
+				Time:       time.Now(),
+				Type:       signals.ConnectionClosed,
+				Message:    formatter.FormatConnection(conn),
+				Connection: &conn,
 			}
 
 			signals.TagConnectionEvent(&event, conn)

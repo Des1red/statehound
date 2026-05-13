@@ -18,6 +18,7 @@ func diffSystemdServices(previous, current map[string]collector.Service) []event
 				Time:    time.Now(),
 				Type:    signals.UnitAppeared,
 				Message: formatter.FormatService(currentService),
+				Service: &currentService,
 			}
 
 			signals.TagServiceEvent(&event, currentService)
@@ -31,6 +32,7 @@ func diffSystemdServices(previous, current map[string]collector.Service) []event
 				Time:    time.Now(),
 				Type:    serviceTransitionType(previousService, currentService),
 				Message: formatter.FormatServiceTransition(previousService, currentService),
+				Service: &currentService,
 			}
 
 			signals.TagServiceEvent(&event, currentService)
@@ -45,6 +47,7 @@ func diffSystemdServices(previous, current map[string]collector.Service) []event
 				Time:    time.Now(),
 				Type:    signals.UnitRemoved,
 				Message: formatter.FormatService(previousService),
+				Service: &previousService,
 			}
 
 			signals.TagServiceEvent(&event, previousService)

@@ -19,6 +19,7 @@ func diffWatchedFiles(previous, current map[string]collector.FileWatch) []events
 				Time:    time.Now(),
 				Type:    signals.FileAdded,
 				Message: formatter.FormatFile(currentFile),
+				File:    &currentFile,
 			}
 
 			signals.TagFileEvent(&event, currentFile)
@@ -32,6 +33,7 @@ func diffWatchedFiles(previous, current map[string]collector.FileWatch) []events
 				Time:    time.Now(),
 				Type:    signals.FileChanged,
 				Message: formatter.FormatFileTransition(previousFile, currentFile),
+				File:    &currentFile,
 			}
 
 			signals.TagFileEvent(&event, currentFile)
@@ -47,6 +49,7 @@ func diffWatchedFiles(previous, current map[string]collector.FileWatch) []events
 				Time:    time.Now(),
 				Type:    signals.FileRemoved,
 				Message: formatter.FormatFile(previousFile),
+				File:    &previousFile,
 			}
 
 			signals.TagFileEvent(&event, previousFile)

@@ -17,6 +17,7 @@ func diffListeningPorts(previous, current map[string]collector.Port) []events.Ev
 				Time:    time.Now(),
 				Type:    signals.PortOpened,
 				Message: formatter.FormatPort(port),
+				Port:    &port,
 			}
 
 			signals.TagPortEvent(&event, port)
@@ -31,6 +32,7 @@ func diffListeningPorts(previous, current map[string]collector.Port) []events.Ev
 				Time:    time.Now(),
 				Type:    signals.PortClosed,
 				Message: formatter.FormatPort(port),
+				Port:    &port,
 			}
 
 			signals.TagPortEvent(&event, port)

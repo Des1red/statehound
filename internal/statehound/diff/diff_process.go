@@ -19,6 +19,7 @@ func diffSuspiciousProcesses(previous, current map[string]collector.Process) []e
 				Time:    time.Now(),
 				Type:    signals.SuspiciousProcessStarted,
 				Message: formatter.FormatProcess(currentProcess),
+				Process: &proc,
 			}
 
 			signals.TagProcessEvent(&event, currentProcess)
