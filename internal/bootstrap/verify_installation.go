@@ -27,5 +27,13 @@ func VerifyInstallation() bool {
 		}
 	}
 
+	ensureNotifierDeps()
+
+	if err := setupNotifierForSudoUser(); err != nil {
+		logger.Warn("desktop notifier was not enabled automatically")
+		logger.Warn(err.Error())
+		logger.Status("Please run: sudo go run . --install")
+		return false
+	}
 	return true
 }
