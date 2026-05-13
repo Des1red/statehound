@@ -23,17 +23,17 @@ func CollectSnapshot() (Snapshot, error) {
 		return Snapshot{}, err
 	}
 
-	processes, err := collectSuspiciousProcesses()
+	processes, err := collectProcesses()
 	if err != nil {
 		return Snapshot{}, err
 	}
 
 	return Snapshot{
-		Time:                time.Now(),
-		Services:            services,
-		Ports:               ports,
-		Files:               files,
-		Connections:         connections,
-		SuspiciousProcesses: processes,
+		Time:        time.Now(),
+		Services:    services,
+		Ports:       ports,
+		Files:       files,
+		Connections: connections,
+		Processes:   processes,
 	}, nil
 }

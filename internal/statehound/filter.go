@@ -10,7 +10,7 @@ import (
 func buildFilter() filter.DiffFilter {
 	return filter.DiffFilter{
 		ServiceFilters: []filter.ServiceFilter{
-			&filter.IgnoreSafeServices{Safe: []string{"systemd", "NetworkManager", "cupsd"}},
+			&filter.IgnoreSafeServices{},
 		},
 		PortFilters: []filter.PortFilter{
 			&filter.SuspiciousListenerFilter{},

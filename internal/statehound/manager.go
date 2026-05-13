@@ -80,6 +80,6 @@ func (m *Manager) Status() string {
 		len(m.previous.Ports),
 		len(m.previous.Files),
 		len(m.previous.Connections),
-		len(m.previous.SuspiciousProcesses),
+		len(m.previous.Processes),
 	)
 }

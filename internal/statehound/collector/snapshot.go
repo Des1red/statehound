@@ -3,12 +3,12 @@ package collector
 import "time"
 
 type Snapshot struct {
-	Time                time.Time
-	Services            map[string]Service
-	Ports               map[string]Port
-	Files               map[string]FileWatch
-	Connections         map[string]Connection
-	SuspiciousProcesses map[string]Process
+	Time        time.Time
+	Services    map[string]Service
+	Ports       map[string]Port
+	Files       map[string]FileWatch
+	Connections map[string]Connection
+	Processes   map[string]Process
 }
 
 type Service struct {

@@ -1,65 +1,143 @@
 package signals
 
 import (
-	"strings"
-
+	"os"
 	"statehound/internal/statehound/collector"
-	"statehound/internal/statehound/events"
+	"strings"
 )
 
-func TagPortEvent(event *events.Event, port collector.Port) {
-	switch port.Scope {
-	case "public":
-		event.Tag(TagPublicListener)
-	case "local":
-		event.Tag(TagLocalListener)
-	case "interface":
-		event.Tag(TagInterfaceListener)
-	}
+var standardRootPaths = []string{
+	"/usr/bin/",
+	"/usr/sbin/",
+	"/usr/lib",
+	"/bin/",
+	"/sbin/",
+	"/opt/",
+	"/usr/local/",
+}
 
-	switch port.Proto {
-	case "tcp":
-		event.Tag(TagTCPListener)
-	case "udp":
-		event.Tag(TagUDPListener)
-	}
+var suspiciousParents = []string{
+	"nginx", "apache2", "httpd", "lighttpd", "caddy",
+	"php-fpm", "php", "gunicorn", "uwsgi",
+	"mysqld", "mariadb", "postgres", "mongod",
+	"redis-server", "node", "ruby",
+}
 
-	process := strings.ToLower(port.Process)
-	exe := strings.ToLower(port.Exe)
-	cmd := strings.ToLower(port.Cmdline)
+var knownShells = []string{"bash", "sh", "zsh", "dash", "fish"}
 
-	if isShellTool(process, exe, cmd) {
-		event.Tag(TagShellTool)
-	}
+func classifyProcess(p collector.Process) string {
+	switch {
+	case strings.Contains(p.Exe, " (deleted)"):
+		return TagDeletedExecutable
 
-	if isBrowserUDP(process, port.Proto) {
-		event.Tag(TagBrowserUDP)
-	}
+	case strings.HasPrefix(p.Exe, "/tmp/"),
+		strings.HasPrefix(p.Exe, "/var/tmp/"),
+		strings.HasPrefix(p.Exe, "/dev/shm/"):
+		return TagTempExecutable
 
-	switch classifyExePath(exe) {
-	case "system":
-		event.Tag(TagSystemBinary)
-	case "user":
-		event.Tag(TagUserBinary)
-	case "temp":
-		event.Tag(TagTempBinary)
+	case isRootNonstandardPath(p):
+		return TagRootNonstandardPath
+
+	case isShellFromSuspiciousParent(p):
+		return TagShellFromSuspiciousParent
+
+	case isScriptServer(p):
+		return TagScriptServer
+
+	case isNetworkTool(p):
+		return TagNetworkTool
 	default:
-		event.Tag(TagUnknownBinary)
+		return ""
 	}
 }
 
-func TagServiceEvent(event *events.Event, service collector.Service) {
-	if service.ActiveState == "failed" || service.SubState == "failed" {
-		event.Tag(TagServiceFailed)
+func isScriptServer(p collector.Process) bool {
+	name := strings.ToLower(p.Name)
+	cmd := strings.ToLower(p.Cmdline)
+
+	switch name {
+	case "python", "python3":
+		return strings.Contains(cmd, "http.server") ||
+			strings.Contains(cmd, "simplehttpserver")
+	case "php":
+		return strings.Contains(cmd, "-s ")
+	case "ruby":
+		return strings.Contains(cmd, "webrick")
 	}
 
-	if strings.HasPrefix(service.Name, "user@") ||
-		strings.HasPrefix(service.Name, "user-runtime-dir@") {
-		event.Tag(TagUserUnit)
-		return
+	return false
+}
+
+func isNetworkTool(p collector.Process) bool {
+	name := strings.ToLower(p.Name)
+	exe := strings.ToLower(p.Exe)
+
+	needles := []string{"nc", "ncat", "netcat", "socat"}
+
+	for _, needle := range needles {
+		if name == needle ||
+			strings.HasSuffix(exe, "/"+needle) {
+			return true
+		}
 	}
 
-	event.Tag(TagSystemUnit)
+	return false
+}
+
+func isRootNonstandardPath(p collector.Process) bool {
+	if p.UID != "0" || p.Exe == "" {
+		return false
+	}
+
+	for _, path := range standardRootPaths {
+		if strings.HasPrefix(p.Exe, path) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func isShellFromSuspiciousParent(p collector.Process) bool {
+	name := strings.ToLower(p.Name)
+
+	isShell := false
+	for _, shell := range knownShells {
+		if name == shell {
+			isShell = true
+			break
+		}
+	}
+
+	if !isShell {
+		return false
+	}
+
+	if p.PPID == "" || p.PPID == "0" || p.PPID == "1" {
+		return false
+	}
+
+	parentName := strings.ToLower(readParentName(p.PPID))
+	if parentName == "" {
+		return false
+	}
+
+	for _, parent := range suspiciousParents {
+		if parentName == parent || strings.HasPrefix(parentName, parent) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func readParentName(pid string) string {
+	data, err := os.ReadFile("/proc/" + pid + "/comm")
+	if err != nil {
+		return ""
+	}
+
+	return strings.TrimSpace(string(data))
 }
 
 func isShellTool(process, exe, cmd string) bool {
@@ -88,19 +166,6 @@ func isShellTool(process, exe, cmd string) bool {
 	return false
 }
 
-func isBrowserUDP(process, proto string) bool {
-	if proto != "udp" {
-		return false
-	}
-
-	switch process {
-	case "firefox", "brave", "chrome", "chromium":
-		return true
-	default:
-		return false
-	}
-}
-
 func classifyExePath(exe string) string {
 	if exe == "" {
 		return "unknown"
@@ -125,68 +190,5 @@ func classifyExePath(exe string) string {
 
 	default:
 		return "unknown"
-	}
-}
-
-func TagFileEvent(event *events.Event, file collector.FileWatch) {
-	path := strings.ToLower(file.Path)
-
-	switch {
-	case strings.Contains(path, "/cron"):
-		event.Tag(TagCronFile)
-		event.Tag(TagPersistenceFile)
-
-	case strings.Contains(path, "/systemd/system/") && strings.HasSuffix(path, ".service"):
-		event.Tag(TagSystemdUnitFile)
-		event.Tag(TagPersistenceFile)
-
-	case strings.HasSuffix(path, "/authorized_keys"):
-		event.Tag(TagSSHKeysFile)
-		event.Tag(TagPersistenceFile)
-	}
-}
-
-func TagConnectionEvent(event *events.Event, conn collector.Connection) {
-	event.Tag(TagOutboundConnection)
-
-	remote := strings.ToLower(conn.RemoteAddress)
-
-	switch remote {
-	case "127.0.0.1", "localhost", "::1":
-		event.Tag(TagLocalRemote)
-	default:
-		event.Tag(TagExternalRemote)
-	}
-
-	process := strings.ToLower(conn.Process)
-	exe := strings.ToLower(conn.Exe)
-	cmd := strings.ToLower(conn.Cmdline)
-
-	if isShellTool(process, exe, cmd) {
-		event.Tag(TagShellTool)
-	}
-
-	switch classifyExePath(exe) {
-	case "system":
-		event.Tag(TagSystemBinary)
-	case "user":
-		event.Tag(TagUserBinary)
-	case "temp":
-		event.Tag(TagTempBinary)
-	default:
-		event.Tag(TagUnknownBinary)
-	}
-}
-
-func TagProcessEvent(event *events.Event, process collector.Process) {
-	event.Tag(TagSuspiciousProcess)
-
-	switch process.Reason {
-	case "deleted_executable":
-		event.Tag(TagDeletedExecutable)
-	case "temp_executable":
-		event.Tag(TagTempExecutable)
-	case "go_build_cache_executable":
-		event.Tag(TagGoBuildExecutable)
 	}
 }

@@ -14,8 +14,9 @@ type PortFilter interface {
 type SuspiciousListenerFilter struct{}
 
 func (f *SuspiciousListenerFilter) MatchPort(e events.Event) bool {
-	if e.HasTag(signals.TagPublicListener) && e.HasTag(signals.TagShellTool) {
-		return true
+	if e.HasTag(signals.TagNoisePort) {
+		return false
 	}
-	return false
+
+	return e.HasTag(signals.TagPublicListener) || e.HasTag(signals.TagShellTool)
 }

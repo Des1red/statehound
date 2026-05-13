@@ -30,7 +30,6 @@ const (
 	TagUDPListener = "udp_listener"
 
 	TagShellTool     = "shell_tool"
-	TagBrowserUDP    = "browser_udp"
 	TagSystemBinary  = "system_binary"
 	TagUserBinary    = "user_binary"
 	TagTempBinary    = "temp_binary"
@@ -50,10 +49,13 @@ const (
 	TagExternalRemote     = "external_remote"
 	TagLocalRemote        = "local_remote"
 
-	TagSuspiciousProcess = "suspicious_process"
-	TagDeletedExecutable = "deleted_executable"
-	TagTempExecutable    = "temp_executable"
-	TagGoBuildExecutable = "go_build_cache_executable"
+	TagSuspiciousProcess         = "suspicious_process"
+	TagDeletedExecutable         = "deleted_executable"
+	TagTempExecutable            = "temp_executable"
+	TagRootNonstandardPath       = "root_nonstandard_path"
+	TagShellFromSuspiciousParent = "shell_from_suspicious_parent"
+	TagScriptServer              = "script_server"
+	TagNetworkTool               = "network_tool"
 )
 
 const (
@@ -65,4 +67,11 @@ const (
 	SuspiciousProcessStarted = "SUSPICIOUS_PROCESS_STARTED"
 	SuspiciousProcessStopped = "SUSPICIOUS_PROCESS_STOPPED"
 	SuspiciousProcessChanged = "SUSPICIOUS_PROCESS_CHANGED"
+)
+
+const (
+	TagNoiseUnit       = "noise_unit"
+	TagNoiseProcess    = "noise_process"
+	TagNoiseConnection = "noise_connection"
+	TagNoisePort       = "noise_port"
 )

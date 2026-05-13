@@ -2,6 +2,7 @@ package filter
 
 import (
 	"statehound/internal/statehound/events"
+	"statehound/internal/statehound/signals"
 	"time"
 )
 
@@ -21,7 +22,13 @@ func (f *ConnectionRateFilter) MatchConnection(e events.Event) bool {
 		return true // not a connection event
 	}
 
-	key := e.Connection.RemoteAddress + ":" + e.Connection.LocalAddress
+	if e.HasTag(signals.TagNoiseConnection) {
+		return false
+	}
+
+	key := e.Connection.LocalAddress + ":" + e.Connection.LocalPort + ":" +
+		e.Connection.RemoteAddress + ":" + e.Connection.RemotePort + ":" +
+		e.Connection.PID
 	now := e.Time
 	if f.LastSeen == nil {
 		f.LastSeen = make(map[string]time.Time)

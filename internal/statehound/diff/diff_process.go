@@ -9,7 +9,7 @@ import (
 	"statehound/internal/statehound/signals"
 )
 
-func diffSuspiciousProcesses(previous, current map[string]collector.Process) []events.Event {
+func diffProcesses(previous, current map[string]collector.Process) []events.Event {
 	out := []events.Event{}
 
 	for pid, currentProcess := range current {
@@ -28,7 +28,7 @@ func diffSuspiciousProcesses(previous, current map[string]collector.Process) []e
 			continue
 		}
 
-		if suspiciousProcessChanged(previousProcess, currentProcess) {
+		if processChanged(previousProcess, currentProcess) {
 			event := events.Event{
 				Time:    time.Now(),
 				Type:    signals.SuspiciousProcessChanged,
@@ -60,8 +60,8 @@ func diffSuspiciousProcesses(previous, current map[string]collector.Process) []e
 	return out
 }
 
-func suspiciousProcessChanged(previous, current collector.Process) bool {
+func processChanged(previous, current collector.Process) bool {
 	return previous.Exe != current.Exe ||
 		previous.Cmdline != current.Cmdline ||
-		previous.Reason != current.Reason
+		previous.UID != current.UID
 }

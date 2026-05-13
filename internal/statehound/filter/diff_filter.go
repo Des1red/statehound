@@ -72,7 +72,7 @@ func (df *DiffFilter) Filter(evts []events.Event) Result {
 				}
 			}
 
-		// suspicious process events
+		//  process events
 		case signals.SuspiciousProcessStarted,
 			signals.SuspiciousProcessStopped,
 			signals.SuspiciousProcessChanged:
@@ -87,10 +87,10 @@ func (df *DiffFilter) Filter(evts []events.Event) Result {
 		if keep {
 			res.LogEvents = append(res.LogEvents, e)
 
-			// Use tags from signals instead of hard-coded strings
 			if e.HasTag(signals.TagPersistenceFile) ||
 				e.HasTag(signals.TagSuspiciousProcess) ||
-				e.HasTag(signals.TagCronFile) {
+				e.HasTag(signals.TagServiceFailed) ||
+				(e.HasTag(signals.TagPublicListener) && e.HasTag(signals.TagShellTool)) {
 				res.Notifications = append(res.Notifications, e)
 			}
 		}

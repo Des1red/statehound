@@ -1,3 +1,5 @@
+// to run this test :
+// sudo STATEHOUND_E2E=1 go test ./tests/e2e -v
 package e2e
 
 import (

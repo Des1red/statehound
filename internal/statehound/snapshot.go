@@ -31,7 +31,7 @@ func (m *Manager) Snapshot() string {
 	out = append(out, fmt.Sprintf("  listening_ports=%d", len(snapshot.Ports)))
 	out = append(out, fmt.Sprintf("  watched_files=%d", len(snapshot.Files)))
 	out = append(out, fmt.Sprintf("  connections=%d", len(snapshot.Connections)))
-	out = append(out, fmt.Sprintf("  suspicious_processes=%d", len(snapshot.SuspiciousProcesses)))
+	out = append(out, fmt.Sprintf("  processes=%d", len(snapshot.Processes)))
 
 	out = append(out, "")
 	out = append(out, "Active services:")
@@ -78,8 +78,8 @@ func (m *Manager) Snapshot() string {
 	}
 
 	out = append(out, "")
-	out = append(out, "Suspicious processes:")
-	processes := sortedProcesses(snapshot.SuspiciousProcesses)
+	out = append(out, "Processes:")
+	processes := sortedProcesses(snapshot.Processes)
 	if len(processes) == 0 {
 		out = append(out, "  none")
 	} else {
