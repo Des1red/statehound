@@ -59,7 +59,7 @@ func (m *Manager) tick() {
 	m.mu.RUnlock()
 	evts := diff.DiffSnapshots(previous, current)
 
-	result := applyFilters(evts)
+	result := m.filter.Filter(evts)
 
 	if err := events.WriteEvents(result.LogEvents); err != nil {
 		logger.Failed("failed to write events", err)

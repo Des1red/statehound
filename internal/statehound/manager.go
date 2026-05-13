@@ -6,6 +6,7 @@ import (
 	"statehound/internal/notify"
 	"statehound/internal/statehound/collector"
 	"statehound/internal/statehound/events"
+	"statehound/internal/statehound/filter"
 	"statehound/internal/statehound/signals"
 	"sync"
 	"time"
@@ -19,11 +20,13 @@ type Manager struct {
 	lastScan time.Time
 
 	notifications []notify.Notification
+	filter        filter.DiffFilter
 }
 
 func NewManager(interval time.Duration) *Manager {
 	return &Manager{
 		interval: interval,
+		filter:   buildFilter(),
 	}
 }
 

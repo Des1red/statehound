@@ -7,9 +7,8 @@ import (
 	"time"
 )
 
-// applyFilters applies all your diff filters and returns filtered events + notifications
-func applyFilters(evts []events.Event) filter.Result {
-	df := filter.DiffFilter{
+func buildFilter() filter.DiffFilter {
+	return filter.DiffFilter{
 		ServiceFilters: []filter.ServiceFilter{
 			&filter.IgnoreSafeServices{Safe: []string{"systemd", "NetworkManager", "cupsd"}},
 		},
@@ -26,8 +25,6 @@ func applyFilters(evts []events.Event) filter.Result {
 			&filter.SuspiciousProcessFilter{},
 		},
 	}
-
-	return df.Filter(evts)
 }
 
 func eventsToNotifications(evts []events.Event) []notify.Notification {
