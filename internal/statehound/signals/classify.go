@@ -9,11 +9,16 @@ import (
 var standardRootPaths = []string{
 	"/usr/bin/",
 	"/usr/sbin/",
-	"/usr/lib",
+	"/usr/lib/",
+	"/usr/lib64/",
+	"/usr/libexec/",
+	"/usr/local/",
 	"/bin/",
 	"/sbin/",
+	"/lib/",
+	"/lib64/",
 	"/opt/",
-	"/usr/local/",
+	"/snap/",
 }
 
 var suspiciousParents = []string{
@@ -174,20 +179,21 @@ func classifyExePath(exe string) string {
 	switch {
 	case strings.HasPrefix(exe, "/usr/bin/"),
 		strings.HasPrefix(exe, "/usr/sbin/"),
-		strings.HasPrefix(exe, "/usr/lib"),
+		strings.HasPrefix(exe, "/usr/lib/"),
+		strings.HasPrefix(exe, "/usr/lib64/"),
+		strings.HasPrefix(exe, "/usr/libexec/"),
 		strings.HasPrefix(exe, "/bin/"),
 		strings.HasPrefix(exe, "/sbin/"),
+		strings.HasPrefix(exe, "/lib/"),
+		strings.HasPrefix(exe, "/lib64/"),
 		strings.HasPrefix(exe, "/opt/"):
 		return "system"
-
 	case strings.HasPrefix(exe, "/home/"):
 		return "user"
-
 	case strings.HasPrefix(exe, "/tmp/"),
 		strings.HasPrefix(exe, "/var/tmp/"),
 		strings.HasPrefix(exe, "/dev/shm/"):
 		return "temp"
-
 	default:
 		return "unknown"
 	}

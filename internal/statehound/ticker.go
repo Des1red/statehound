@@ -42,7 +42,7 @@ func (m *Manager) tick() {
 					strconv.Itoa(len(current.Files)) +
 					" outbound_connections=" +
 					strconv.Itoa(len(current.Connections)) +
-					" suspicious_processes=" +
+					" processes=" +
 					strconv.Itoa(len(current.Processes)),
 			},
 		}
