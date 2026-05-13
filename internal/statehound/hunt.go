@@ -75,7 +75,17 @@ func huntServices(services map[string]collector.Service, target string) []string
 
 	for name, service := range services {
 		if serviceMatchesTarget(name, target) {
-			matches = append(matches, "  "+formatter.FormatService(service))
+			line := "  " + formatter.FormatService(service)
+
+			details := collector.CollectServiceDetails(name)
+			if details.MainPID != "" && details.MainPID != "0" {
+				line += " pid=" + details.MainPID
+			}
+			if details.FragmentPath != "" {
+				line += " fragment=" + details.FragmentPath
+			}
+
+			matches = append(matches, line)
 		}
 	}
 

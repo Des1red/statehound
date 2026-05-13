@@ -16,14 +16,27 @@ var noiseServiceNames = []string{
 	"avahi-daemon",
 	"ModemManager",
 	"cupsd",
+	"user-runtime-dir@",
+	"user@",
 }
 
 func isNoiseService(service collector.Service) bool {
 	name := strings.TrimSuffix(service.Name, ".service")
+
 	for _, noise := range noiseServiceNames {
-		if name == strings.TrimSuffix(noise, ".service") {
+		noise = strings.TrimSuffix(noise, ".service")
+
+		if strings.HasSuffix(noise, "@") {
+			if strings.HasPrefix(name, noise) {
+				return true
+			}
+			continue
+		}
+
+		if name == noise {
 			return true
 		}
 	}
+
 	return false
 }

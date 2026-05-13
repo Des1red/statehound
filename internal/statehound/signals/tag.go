@@ -142,6 +142,10 @@ func TagServiceEvent(event *events.Event, service collector.Service) {
 		event.Tag(TagServiceFailed)
 	}
 
+	if isNoiseService(service) {
+		event.Tag(TagNoiseUnit)
+	}
+
 	if strings.HasPrefix(service.Name, "user@") ||
 		strings.HasPrefix(service.Name, "user-runtime-dir@") {
 		event.Tag(TagUserUnit)
@@ -150,7 +154,4 @@ func TagServiceEvent(event *events.Event, service collector.Service) {
 
 	event.Tag(TagSystemUnit)
 
-	if isNoiseService(service) {
-		event.Tag(TagNoiseUnit)
-	}
 }

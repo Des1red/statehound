@@ -16,7 +16,7 @@ type ServiceDetails struct {
 	FragmentPath string
 }
 
-func collectSystemdServiceDetails(name string) ServiceDetails {
+func CollectServiceDetails(name string) ServiceDetails {
 	out, err := command.Output(
 		"systemctl",
 		"show",
