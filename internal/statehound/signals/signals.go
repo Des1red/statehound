@@ -50,6 +50,8 @@ const (
 	TagLocalRemote        = "local_remote"
 
 	TagSuspiciousProcess         = "suspicious_process"
+	TagHomeHiddenExecutable      = "home_hidden_executable"
+	TagUserLocalExecutable       = "user_local_executable"
 	TagDeletedExecutable         = "deleted_executable"
 	TagTempExecutable            = "temp_executable"
 	TagRootNonstandardPath       = "root_nonstandard_path"

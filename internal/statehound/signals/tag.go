@@ -91,7 +91,10 @@ func TagProcessEvent(event *events.Event, process collector.Process) {
 		event.Tag(TagScriptServer)
 	case TagNetworkTool:
 		event.Tag(TagNetworkTool)
-
+	case TagHomeHiddenExecutable:
+		event.Tag(TagHomeHiddenExecutable)
+	case TagUserLocalExecutable:
+		event.Tag(TagUserLocalExecutable)
 	}
 }
 

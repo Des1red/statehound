@@ -34,26 +34,45 @@ func classifyProcess(p collector.Process) string {
 	switch {
 	case strings.Contains(p.Exe, " (deleted)"):
 		return TagDeletedExecutable
-
 	case strings.HasPrefix(p.Exe, "/tmp/"),
 		strings.HasPrefix(p.Exe, "/var/tmp/"),
 		strings.HasPrefix(p.Exe, "/dev/shm/"):
 		return TagTempExecutable
-
 	case isRootNonstandardPath(p):
 		return TagRootNonstandardPath
-
 	case isShellFromSuspiciousParent(p):
 		return TagShellFromSuspiciousParent
-
+	case isHomeHiddenExecutable(p):
+		return TagHomeHiddenExecutable
+	case isUserLocalExecutable(p):
+		return TagUserLocalExecutable
 	case isScriptServer(p):
 		return TagScriptServer
-
 	case isNetworkTool(p):
 		return TagNetworkTool
 	default:
 		return ""
 	}
+}
+
+func isHomeHiddenExecutable(p collector.Process) bool {
+	if !strings.HasPrefix(p.Exe, "/home/") {
+		return false
+	}
+	parts := strings.Split(p.Exe, "/")
+	for _, part := range parts {
+		if strings.HasPrefix(part, ".") {
+			return true
+		}
+	}
+	return false
+}
+
+func isUserLocalExecutable(p collector.Process) bool {
+	if !strings.HasPrefix(p.Exe, "/home/") {
+		return false
+	}
+	return strings.Contains(p.Exe, "/.local/bin/")
 }
 
 func isScriptServer(p collector.Process) bool {
