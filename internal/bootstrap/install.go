@@ -45,6 +45,7 @@ func Install() {
 	logger.Status("installing statehound")
 
 	cleanupExistingInstall()
+	ensureNotifierDeps()
 
 	if err := command.Run("go", "build", "-o", model.BinaryPath, "."); err != nil {
 		logger.Failed("failed to build/install binary", err)

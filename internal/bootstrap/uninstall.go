@@ -63,6 +63,7 @@ func Uninstall(purge bool) {
 	_ = command.Run("systemctl", "reset-failed", model.ServiceName)
 
 	if purge {
+		RemoveInstalledDeps()
 		logger.Success("statehound uninstalled and purged")
 		return
 	}

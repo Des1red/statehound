@@ -18,6 +18,7 @@ const (
 	EventBackupDir = LogDir + "/backups"
 	EventPath      = LogDir + "/events.log"
 
+	InstalledDepsPath = ConfigDir + "/installed_deps.json"
 	RuntimeDir        = "/run/" + GroupName
 	ControlSocketPath = RuntimeDir + "/" + GroupName + ".sock"
 	NotifySocketPath  = RuntimeDir + "/notify.sock"
