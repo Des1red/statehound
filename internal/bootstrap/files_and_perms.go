@@ -29,6 +29,12 @@ func createFiles() error {
 		}
 	}
 
+	if _, err := os.Stat(model.InstalledDepsPath); os.IsNotExist(err) {
+		if err := os.WriteFile(model.InstalledDepsPath, []byte("{}"), 0600); err != nil {
+			return fmt.Errorf("failed to create installed deps file: %w", err)
+		}
+	}
+
 	if err := os.MkdirAll(model.EventBackupDir, 0700); err != nil {
 		return fmt.Errorf("failed to create event backup directory: %w", err)
 	}
@@ -83,6 +89,14 @@ func enforcePermissions() error {
 
 	if err := os.Chmod(model.EventPath, 0600); err != nil {
 		return fmt.Errorf("failed to set event log permissions: %w", err)
+	}
+
+	if err := os.Chown(model.InstalledDepsPath, 0, 0); err != nil {
+		return fmt.Errorf("failed to set installed deps file owner: %w", err)
+	}
+
+	if err := os.Chmod(model.InstalledDepsPath, 0600); err != nil {
+		return fmt.Errorf("failed to set installed deps file permissions: %w", err)
 	}
 
 	if err := os.Chown(model.EventBackupDir, 0, 0); err != nil {
