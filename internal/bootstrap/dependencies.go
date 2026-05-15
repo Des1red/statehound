@@ -22,6 +22,80 @@ const (
 	distroSUSE
 )
 
+type depInfo struct {
+	CheckCmd []string
+	Packages map[distroFamily]string
+}
+
+var deps = map[string]depInfo{
+	"notify-send": {
+		CheckCmd: []string{"which", "notify-send"},
+		Packages: map[distroFamily]string{
+			distroFedora: "libnotify",
+			distroDebian: "libnotify-bin",
+			distroArch:   "libnotify",
+			distroSUSE:   "libnotify-tools",
+		},
+	},
+	"setfacl": {
+		CheckCmd: []string{"which", "setfacl"},
+		Packages: map[distroFamily]string{
+			distroFedora: "acl",
+			distroDebian: "acl",
+			distroArch:   "acl",
+			distroSUSE:   "acl",
+		},
+	},
+	"zenity": {
+		CheckCmd: []string{"which", "zenity"},
+		Packages: map[distroFamily]string{
+			distroFedora: "zenity",
+			distroDebian: "zenity",
+			distroArch:   "zenity",
+			distroSUSE:   "zenity",
+		},
+	},
+}
+
+type distroInfo struct {
+	Name       string
+	Keywords   []string
+	InstallCmd []string
+	RemoveCmd  []string
+}
+
+var distroInfos = map[distroFamily]distroInfo{
+	distroFedora: {
+		Name:       "fedora",
+		Keywords:   []string{"fedora", "rhel", "centos", "almalinux", "rocky"},
+		InstallCmd: []string{"dnf", "install", "-y"},
+		RemoveCmd:  []string{"dnf", "remove", "-y"},
+	},
+	distroDebian: {
+		Name:       "debian",
+		Keywords:   []string{"debian", "ubuntu", "kali", "mint", "pop"},
+		InstallCmd: []string{"apt-get", "install", "-y"},
+		RemoveCmd:  []string{"apt-get", "remove", "-y"},
+	},
+	distroArch: {
+		Name:       "arch",
+		Keywords:   []string{"arch", "manjaro", "endeavour"},
+		InstallCmd: []string{"pacman", "-S", "--noconfirm"},
+		RemoveCmd:  []string{"pacman", "-R", "--noconfirm"},
+	},
+	distroSUSE: {
+		Name:       "suse",
+		Keywords:   []string{"suse", "opensuse"},
+		InstallCmd: []string{"zypper", "install", "-y"},
+		RemoveCmd:  []string{"zypper", "remove", "-y"},
+	},
+}
+
+type installedDeps struct {
+	Packages []string `json:"packages"`
+	Distro   string   `json:"distro"`
+}
+
 func detectDistro() distroFamily {
 	f, err := os.Open("/etc/os-release")
 	if err != nil {
@@ -42,118 +116,13 @@ func detectDistro() distroFamily {
 
 	combined := strings.ToLower(values["ID"] + " " + values["ID_LIKE"])
 
-	switch {
-	case containsAny(combined, "fedora", "rhel", "centos", "almalinux", "rocky"):
-		return distroFedora
-	case containsAny(combined, "debian", "ubuntu", "kali", "mint", "pop"):
-		return distroDebian
-	case containsAny(combined, "arch", "manjaro", "endeavour"):
-		return distroArch
-	case containsAny(combined, "suse", "opensuse"):
-		return distroSUSE
-	default:
-		return distroUnknown
-	}
-}
-
-func containsAny(s string, needles ...string) bool {
-	for _, needle := range needles {
-		if strings.Contains(s, needle) {
-			return true
-		}
-	}
-	return false
-}
-
-func checkNotifierDeps() []string {
-	var missing []string
-	for _, dep := range []string{"notify-send", "setfacl"} {
-		if _, err := command.Output("which", dep); err != nil {
-			missing = append(missing, dep)
-		}
-	}
-	return missing
-}
-
-var packageMap = map[distroFamily]map[string]string{
-	distroFedora: {
-		"notify-send": "libnotify",
-		"setfacl":     "acl",
-	},
-	distroDebian: {
-		"notify-send": "libnotify-bin",
-		"setfacl":     "acl",
-	},
-	distroArch: {
-		"notify-send": "libnotify",
-		"setfacl":     "acl",
-	},
-	distroSUSE: {
-		"notify-send": "libnotify-tools",
-		"setfacl":     "acl",
-	},
-}
-
-func installNotifierDeps(distro distroFamily, missing []string) error {
-	distroPackages, ok := packageMap[distro]
-	if !ok {
-		return fmt.Errorf("unsupported distro — install manually: %s", strings.Join(missing, ", "))
-	}
-
-	var packages []string
-	for _, binary := range missing {
-		if pkg, ok := distroPackages[binary]; ok {
-			packages = append(packages, pkg)
+	for family, info := range distroInfos {
+		if containsAny(combined, info.Keywords...) {
+			return family
 		}
 	}
 
-	if len(packages) == 0 {
-		return nil
-	}
-
-	var err error
-	switch distro {
-	case distroFedora:
-		err = command.Run("dnf", append([]string{"install", "-y"}, packages...)...)
-	case distroDebian:
-		_ = command.Run("apt-get", "update", "-qq")
-		err = command.Run("apt-get", append([]string{"install", "-y"}, packages...)...)
-	case distroArch:
-		err = command.Run("pacman", append([]string{"-S", "--noconfirm"}, packages...)...)
-	case distroSUSE:
-		err = command.Run("zypper", append([]string{"install", "-y"}, packages...)...)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	saveInstalledDeps(distro, packages)
-	return nil
-}
-
-func ensureNotifierDeps() {
-	missing := checkNotifierDeps()
-	if len(missing) == 0 {
-		return
-	}
-
-	logger.Status("installing missing notifier dependencies: " + strings.Join(missing, ", "))
-
-	distro := detectDistro()
-	if distro == distroUnknown {
-		logger.Warn("could not detect distro — install manually: " + strings.Join(missing, ", "))
-		return
-	}
-
-	if err := installNotifierDeps(distro, missing); err != nil {
-		logger.Warn("failed to install notifier dependencies: " + err.Error())
-	}
-}
-
-type installedDeps struct {
-	Packages []string `json:"packages"`
-	Distro   string   `json:"distro"`
+	return distroUnknown
 }
 
 func saveInstalledDeps(distro distroFamily, packages []string) {
@@ -171,47 +140,121 @@ func saveInstalledDeps(distro distroFamily, packages []string) {
 }
 
 func distroName(distro distroFamily) string {
-	switch distro {
-	case distroFedora:
-		return "fedora"
-	case distroDebian:
-		return "debian"
-	case distroArch:
-		return "arch"
-	case distroSUSE:
-		return "suse"
-	default:
-		return "unknown"
+	if info, ok := distroInfos[distro]; ok {
+		return info.Name
+	}
+	return "unknown"
+}
+
+func distroFromName(name string) distroFamily {
+	for family, info := range distroInfos {
+		if info.Name == name {
+			return family
+		}
+	}
+	return distroUnknown
+}
+
+func containsAny(s string, needles ...string) bool {
+	for _, needle := range needles {
+		if strings.Contains(s, needle) {
+			return true
+		}
+	}
+	return false
+}
+
+func checkDeps() []string {
+	var missing []string
+	for name, dep := range deps {
+		if _, err := command.Output(dep.CheckCmd[0], dep.CheckCmd[1:]...); err != nil {
+			missing = append(missing, name)
+		}
+	}
+	return missing
+}
+
+func installDeps(distro distroFamily, missing []string) error {
+	info, ok := distroInfos[distro]
+	if !ok {
+		return fmt.Errorf("unsupported distro — install manually: %s", strings.Join(missing, ", "))
+	}
+
+	var packages []string
+	for _, name := range missing {
+		dep, ok := deps[name]
+		if !ok {
+			continue
+		}
+		pkg, ok := dep.Packages[distro]
+		if !ok {
+			continue
+		}
+		packages = append(packages, pkg)
+	}
+
+	if len(packages) == 0 {
+		return nil
+	}
+
+	cmd := append(info.InstallCmd, packages...)
+
+	if distro == distroDebian {
+		_ = command.Run("apt-get", "update", "-qq")
+	}
+
+	if err := command.Run(cmd[0], cmd[1:]...); err != nil {
+		return err
+	}
+
+	saveInstalledDeps(distro, packages)
+	return nil
+}
+
+func ensureNotifierDeps() {
+	missing := checkDeps()
+	if len(missing) == 0 {
+		return
+	}
+
+	logger.Status("installing missing notifier dependencies: " + strings.Join(missing, ", "))
+
+	distro := detectDistro()
+	if distro == distroUnknown {
+		logger.Warn("could not detect distro — install manually: " + strings.Join(missing, ", "))
+		return
+	}
+
+	if err := installDeps(distro, missing); err != nil {
+		logger.Warn("failed to install notifier dependencies: " + err.Error())
 	}
 }
 
-func RemoveInstalledDeps() {
+func removeInstalledDeps() {
 	data, err := os.ReadFile(model.InstalledDepsPath)
 	if err != nil {
 		return
 	}
 
-	var deps installedDeps
-	if err := json.Unmarshal(data, &deps); err != nil {
+	var installed installedDeps
+	if err := json.Unmarshal(data, &installed); err != nil {
 		return
 	}
 
-	if len(deps.Packages) == 0 {
+	if len(installed.Packages) == 0 {
 		return
 	}
 
-	logger.Status("removing dependencies installed by statehound: " + strings.Join(deps.Packages, ", "))
-
-	switch deps.Distro {
-	case "fedora":
-		_ = command.Run("dnf", append([]string{"remove", "-y"}, deps.Packages...)...)
-	case "debian":
-		_ = command.Run("apt-get", append([]string{"remove", "-y"}, deps.Packages...)...)
-	case "arch":
-		_ = command.Run("pacman", append([]string{"-R", "--noconfirm"}, deps.Packages...)...)
-	case "suse":
-		_ = command.Run("zypper", append([]string{"remove", "-y"}, deps.Packages...)...)
+	distro := distroFromName(installed.Distro)
+	info, ok := distroInfos[distro]
+	if !ok {
+		logger.Warn("could not determine distro for dep removal")
+		return
 	}
 
+	logger.Status("removing dependencies installed by statehound: " + strings.Join(installed.Packages, ", "))
+
+	cmd := append(info.RemoveCmd, installed.Packages...)
+	_ = command.Run(cmd[0], cmd[1:]...)
 	_ = os.Remove(model.InstalledDepsPath)
 }

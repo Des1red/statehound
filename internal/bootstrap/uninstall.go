@@ -42,7 +42,7 @@ func Uninstall(purge bool) {
 	}
 
 	if purge {
-		RemoveInstalledDeps()
+		removeInstalledDeps()
 
 		if err := os.RemoveAll(model.ConfigDir); err != nil {
 			logger.Failed("failed to remove statehound config directory", err)
