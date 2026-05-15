@@ -13,13 +13,15 @@ type CLIFlags struct {
 	Restart  bool
 	Status   bool
 	Logs     bool
-	Events   bool
 	Snapshot bool
-	Hunt     string
 
+	Hunt string
+
+	Events      bool
 	ClearEvents bool
+	Filter      string
 
-	Verbose bool
+	Verbose bool // unused
 }
 
 type RuntimeFlags struct {

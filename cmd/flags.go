@@ -26,6 +26,7 @@ func flags() model.Flags {
 	fs.BoolVar(&f.CLI.Status, "status", false, "show statehound daemon status")
 	fs.BoolVar(&f.CLI.Logs, "logs", false, "show statehound logs")
 	fs.BoolVar(&f.CLI.Events, "events", false, "show statehound events")
+	fs.StringVarP(&f.CLI.Filter, "filter", "f", "", "filter events by urgency: critical, normal")
 	fs.BoolVar(&f.CLI.ClearEvents, "clear-events", false, "clear statehound event log")
 	fs.BoolVar(&f.CLI.Snapshot, "snapshot", false, "show current statehound snapshot")
 	fs.StringVar(&f.CLI.Hunt, "hunt", "", "investigate a service, process, pid, or port")
@@ -79,7 +80,7 @@ func handleFlags() {
 	case f.CLI.ClearEvents:
 		clearEvents()
 	case f.CLI.Events:
-		events()
+		events(f.CLI.Filter)
 	case f.CLI.Hunt != "":
 		hunt(f.CLI.Hunt)
 	default:

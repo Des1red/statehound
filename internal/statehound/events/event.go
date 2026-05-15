@@ -15,13 +15,22 @@ type Event struct {
 	Type    string
 	Message string
 
-	Tags []string
+	Urgency string
+	Tags    []string
 
 	Connection *collector.Connection // optional, only set for CONNECTION_* events
 	Process    *collector.Process    // optional, for suspicious processes
 	File       *collector.FileWatch  // optional, for FILE_* events
 	Service    *collector.Service    // optional, for SERVICE_* events
 	Port       *collector.Port       // optional, for PORT_* events
+}
+
+func (e *Event) TagUrgency(level string) {
+	level = strings.TrimSpace(level)
+	if level == "" {
+		return
+	}
+	e.Urgency = level
 }
 
 func (e *Event) Tag(tag string) {
@@ -50,6 +59,16 @@ func (e Event) HasTag(tag string) bool {
 }
 
 func (e Event) string() string {
+	if e.Urgency != "" {
+		return fmt.Sprintf(
+			"[%s] [%s] [%s] %s\n",
+			e.Time.Format(time.RFC3339),
+			e.Urgency,
+			e.Type,
+			e.Message,
+		)
+	}
+
 	return fmt.Sprintf(
 		"[%s] %s %s\n",
 		e.Time.Format(time.RFC3339),

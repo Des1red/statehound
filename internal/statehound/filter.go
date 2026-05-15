@@ -1,8 +1,6 @@
 package statehound
 
 import (
-	"statehound/internal/notify"
-	"statehound/internal/statehound/events"
 	"statehound/internal/statehound/filter"
 	"time"
 )
@@ -25,17 +23,4 @@ func buildFilter() filter.DiffFilter {
 			&filter.SuspiciousProcessFilter{},
 		},
 	}
-}
-
-func eventsToNotifications(evts []events.Event) []notify.Notification {
-	var out []notify.Notification
-	for _, e := range evts {
-		out = append(out, notify.Notification{
-			Time:    e.Time.Format("2006-01-02T15:04:05Z07:00"),
-			Title:   e.Type,
-			Message: e.Message,
-			Urgency: "critical", // or pick based on tag/type
-		})
-	}
-	return out
 }

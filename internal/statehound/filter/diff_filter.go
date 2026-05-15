@@ -86,11 +86,7 @@ func (df *DiffFilter) Filter(evts []events.Event) Result {
 
 		if keep {
 			res.LogEvents = append(res.LogEvents, e)
-
-			if e.HasTag(signals.TagPersistenceFile) ||
-				e.HasTag(signals.TagSuspiciousProcess) ||
-				e.HasTag(signals.TagServiceFailed) ||
-				(e.HasTag(signals.TagPublicListener) && e.HasTag(signals.TagShellTool)) {
+			if e.Urgency != "" {
 				res.Notifications = append(res.Notifications, e)
 			}
 		}

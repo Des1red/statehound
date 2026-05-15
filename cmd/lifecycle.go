@@ -23,6 +23,8 @@ func printHelp() {
 	fmt.Println("  statehound --logs")
 	fmt.Println("  statehound --snapshot")
 	fmt.Println("  statehound --events")
+	fmt.Println("  statehound --events --filter critical")
+	fmt.Println("  statehound --events -f normal")
 	fmt.Println("  statehound --clear-events")
 	fmt.Println("  statehound --hunt sshd.service")
 	fmt.Println("  statehound --hunt 4444")
@@ -40,6 +42,7 @@ func printHelp() {
 	fmt.Println("      --logs            show statehound logs")
 	fmt.Println("      --snapshot        show full current statehound snapshot")
 	fmt.Println("      --events          show statehound events")
+	fmt.Println("  -f, --filter string   filter events by urgency: critical, normal")
 	fmt.Println("      --clear-events    clear statehound event log")
 	fmt.Println("      --hunt string     investigate a service, process, pid, or port")
 	fmt.Println("      --verbose         enable verbose output")
@@ -92,11 +95,11 @@ func logs() {
 	runtime.Log()
 }
 
-func events() {
+func events(filter string) {
 	if !bootstrap.VerifyInstallation() {
 		return
 	}
-	runtime.Events()
+	runtime.ShowEvents(filter)
 }
 
 func clearEvents() {

@@ -25,6 +25,10 @@ func TagFileEvent(event *events.Event, file collector.FileWatch) {
 		event.Tag(TagSSHKeysFile)
 		event.Tag(TagPersistenceFile)
 	}
+
+	if event.HasTag(TagPersistenceFile) {
+		event.TagUrgency(TagUrgencyCritical)
+	}
 }
 
 func TagConnectionEvent(event *events.Event, conn collector.Connection) {
@@ -62,6 +66,10 @@ func TagConnectionEvent(event *events.Event, conn collector.Connection) {
 	default:
 		event.Tag(TagUnknownBinary)
 	}
+
+	if event.HasTag(TagShellTool) && event.HasTag(TagExternalRemote) {
+		event.TagUrgency(TagUrgencyCritical)
+	}
 }
 
 func TagProcessEvent(event *events.Event, process collector.Process) {
@@ -95,6 +103,15 @@ func TagProcessEvent(event *events.Event, process collector.Process) {
 		event.Tag(TagHomeHiddenExecutable)
 	case TagUserLocalExecutable:
 		event.Tag(TagUserLocalExecutable)
+	}
+	// urgency
+	switch reason {
+	case TagDeletedExecutable, TagTempExecutable,
+		TagHomeHiddenExecutable, TagRootNonstandardPath,
+		TagShellFromSuspiciousParent:
+		event.TagUrgency(TagUrgencyCritical)
+	case TagUserLocalExecutable, TagScriptServer, TagNetworkTool:
+		event.TagUrgency(TagUrgencyNormal)
 	}
 }
 
@@ -138,6 +155,12 @@ func TagPortEvent(event *events.Event, port collector.Port) {
 	default:
 		event.Tag(TagUnknownBinary)
 	}
+
+	if event.HasTag(TagPublicListener) && event.HasTag(TagShellTool) {
+		event.TagUrgency(TagUrgencyCritical)
+	} else if event.HasTag(TagPublicListener) {
+		event.TagUrgency(TagUrgencyNormal)
+	}
 }
 
 func TagServiceEvent(event *events.Event, service collector.Service) {
@@ -157,4 +180,7 @@ func TagServiceEvent(event *events.Event, service collector.Service) {
 
 	event.Tag(TagSystemUnit)
 
+	if event.HasTag(TagServiceFailed) {
+		event.TagUrgency(TagUrgencyNormal)
+	}
 }

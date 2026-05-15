@@ -1,6 +1,11 @@
 package signals
 
 const (
+	TagUrgencyCritical = "critical"
+	TagUrgencyNormal   = "normal"
+)
+
+const (
 	UnitAppeared = "UNIT_APPEARED"
 	UnitRemoved  = "UNIT_REMOVED"
 

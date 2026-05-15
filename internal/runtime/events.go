@@ -3,12 +3,13 @@ package runtime
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"statehound/internal/logger"
 	"statehound/internal/model"
 )
 
-func Events() {
+func ShowEvents(filter string) {
 	data, err := os.ReadFile(model.EventPath)
 	if err != nil {
 		logger.Failed("failed to read statehound events", err)
@@ -20,7 +21,17 @@ func Events() {
 		return
 	}
 
-	fmt.Print(string(data))
+	if filter == "" {
+		fmt.Print(string(data))
+		return
+	}
+
+	tag := "[" + filter + "]"
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.Contains(line, tag) {
+			fmt.Println(line)
+		}
+	}
 }
 
 func ClearEvents() {
