@@ -46,13 +46,13 @@ var deps = map[string]depInfo{
 			distroSUSE:   "acl",
 		},
 	},
-	"zenity": {
-		CheckCmd: []string{"which", "zenity"},
+	"yad": {
+		CheckCmd: []string{"which", "yad"},
 		Packages: map[distroFamily]string{
-			distroFedora: "zenity",
-			distroDebian: "zenity",
-			distroArch:   "zenity",
-			distroSUSE:   "zenity",
+			distroFedora: "yad",
+			distroDebian: "yad",
+			distroArch:   "yad",
+			distroSUSE:   "yad",
 		},
 	},
 }

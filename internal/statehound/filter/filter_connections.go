@@ -19,7 +19,7 @@ type ConnectionRateFilter struct {
 
 func (f *ConnectionRateFilter) MatchConnection(e events.Event) bool {
 	if e.Connection == nil {
-		return true // not a connection event
+		return true
 	}
 
 	if e.HasTag(signals.TagNoiseConnection) {
@@ -29,9 +29,17 @@ func (f *ConnectionRateFilter) MatchConnection(e events.Event) bool {
 	key := e.Connection.LocalAddress + ":" + e.Connection.LocalPort + ":" +
 		e.Connection.RemoteAddress + ":" + e.Connection.RemotePort + ":" +
 		e.Connection.PID
+
 	now := e.Time
+
 	if f.LastSeen == nil {
 		f.LastSeen = make(map[string]time.Time)
+	}
+
+	for k, t := range f.LastSeen {
+		if now.Sub(t) > f.Interval {
+			delete(f.LastSeen, k)
+		}
 	}
 
 	last, ok := f.LastSeen[key]
@@ -40,5 +48,6 @@ func (f *ConnectionRateFilter) MatchConnection(e events.Event) bool {
 	if ok && now.Sub(last) < f.Interval {
 		return false
 	}
+
 	return true
 }

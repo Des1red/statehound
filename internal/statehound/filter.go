@@ -17,7 +17,7 @@ func buildFilter() filter.DiffFilter {
 			&filter.PersistenceFileFilter{},
 		},
 		ConnectionFilters: []filter.ConnectionFilter{
-			&filter.ConnectionRateFilter{Interval: 2 * time.Second},
+			&filter.ConnectionRateFilter{Interval: 30 * time.Second},
 		},
 		ProcessFilters: []filter.ProcessFilter{
 			&filter.SuspiciousProcessFilter{},
