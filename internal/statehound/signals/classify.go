@@ -42,10 +42,10 @@ func classifyProcess(p collector.Process) string {
 		return TagRootNonstandardPath
 	case isShellFromSuspiciousParent(p):
 		return TagShellFromSuspiciousParent
-	case isHomeHiddenExecutable(p):
-		return TagHomeHiddenExecutable
 	case isUserLocalExecutable(p):
 		return TagUserLocalExecutable
+	case isHomeHiddenExecutable(p):
+		return TagHomeHiddenExecutable
 	case isScriptServer(p):
 		return TagScriptServer
 	case isNetworkTool(p):

@@ -13,11 +13,11 @@ func Uninstall(purge bool) {
 
 	cleanupNotifierForSudoUser()
 
-	if err := command.Run("systemctl", "stop", model.ServiceName); err != nil {
+	if err := command.RunSilent("systemctl", "stop", model.ServiceName); err != nil {
 		logger.Warn("service was not running or could not be stopped")
 	}
 
-	if err := command.Run("systemctl", "disable", model.ServiceName); err != nil {
+	if err := command.RunSilent("systemctl", "disable", model.ServiceName); err != nil {
 		logger.Warn("service was not enabled or could not be disabled")
 	}
 
@@ -62,7 +62,7 @@ func Uninstall(purge bool) {
 		return
 	}
 
-	_ = command.Run("systemctl", "reset-failed", model.ServiceName)
+	_ = command.RunSilent("systemctl", "reset-failed", model.ServiceName)
 
 	if purge {
 		logger.Success("statehound uninstalled and purged")

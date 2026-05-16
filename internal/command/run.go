@@ -11,3 +11,8 @@ func Run(name string, args ...string) error {
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
+
+func RunSilent(name string, args ...string) error {
+	cmd := exec.Command(name, args...)
+	return cmd.Run()
+}

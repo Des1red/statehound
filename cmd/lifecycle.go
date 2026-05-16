@@ -102,6 +102,13 @@ func events(filter string) {
 	runtime.ShowEvents(filter)
 }
 
+func eventsGUI(filter string) {
+	if !bootstrap.VerifyInstallation() {
+		return
+	}
+	runtime.EventsGUI(filter)
+}
+
 func clearEvents() {
 	if !bootstrap.VerifyInstallation() {
 		return

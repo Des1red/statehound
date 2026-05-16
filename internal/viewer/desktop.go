@@ -1,4 +1,4 @@
-package notify
+package viewer
 
 import (
 	"bufio"
@@ -15,7 +15,7 @@ func (s *Session) ActionCh() <-chan bool {
 	return s.action
 }
 
-func Start(title, message, urgency string) (*Session, error) {
+func start(title, message, urgency string) (*Session, error) {
 	cmd := exec.Command(
 		"notify-send",
 		"--print-id",
@@ -60,37 +60,4 @@ func Start(title, message, urgency string) (*Session, error) {
 		ID:     <-idCh,
 		action: actionCh,
 	}, nil
-}
-
-func Send(title, message, urgency string) (string, error) {
-	out, err := exec.Command(
-		"notify-send",
-		"--print-id",
-		"-u", urgency,
-		title,
-		message,
-	).Output()
-
-	if err != nil {
-		return "", err
-	}
-
-	return strings.TrimSpace(string(out)), nil
-}
-
-func Replace(id, title, message, urgency string) (string, error) {
-	out, err := exec.Command(
-		"notify-send",
-		"--print-id",
-		"--replace-id="+id,
-		"-u", urgency,
-		title,
-		message,
-	).Output()
-
-	if err != nil {
-		return "", err
-	}
-
-	return strings.TrimSpace(string(out)), nil
 }

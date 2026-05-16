@@ -18,6 +18,7 @@ type CLIFlags struct {
 	Hunt string
 
 	Events      bool
+	EventsGUI   bool
 	ClearEvents bool
 	Filter      string
 

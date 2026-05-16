@@ -2,22 +2,28 @@ package statehound
 
 import (
 	"encoding/json"
-	"statehound/internal/notify"
 	"statehound/internal/statehound/events"
 )
 
-func (m *Manager) PushNotification(n notify.Notification) {
+type Notification struct {
+	Time    string
+	Title   string
+	Message string
+	Urgency string
+}
+
+func (m *Manager) PushNotification(n Notification) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	m.notifications = append(m.notifications, n)
 }
 
-func (m *Manager) DrainNotifications() []notify.Notification {
+func (m *Manager) DrainNotifications() []Notification {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	out := append([]notify.Notification(nil), m.notifications...)
+	out := append([]Notification(nil), m.notifications...)
 	m.notifications = nil
 
 	return out
@@ -34,15 +40,15 @@ func (m *Manager) NotificationsJSON() string {
 	return string(data)
 }
 
-func eventsToNotifications(evts []events.Event) []notify.Notification {
-	var out []notify.Notification
+func eventsToNotifications(evts []events.Event) []Notification {
+	var out []Notification
 
 	for _, e := range evts {
 		if e.Urgency == "" {
 			continue
 		}
 
-		out = append(out, notify.Notification{
+		out = append(out, Notification{
 			Time:    e.Time.Format("2006-01-02T15:04:05Z07:00"),
 			Title:   e.Type,
 			Message: e.Message,

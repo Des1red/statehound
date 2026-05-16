@@ -7,6 +7,7 @@ import (
 	"statehound/internal/logger"
 	"statehound/internal/model"
 	"statehound/internal/statehound/events"
+	"statehound/internal/viewer"
 )
 
 func ShowEvents(filter string) {
@@ -20,6 +21,14 @@ func ShowEvents(filter string) {
 		return
 	}
 	fmt.Print(content)
+}
+
+func EventsGUI(filter string) {
+	if filter == "" || (filter != "critical" && filter != "normal") {
+		filter = "critical"
+	}
+
+	viewer.Show(filter)
 }
 
 func ClearEvents() {

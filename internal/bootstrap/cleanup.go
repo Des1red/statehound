@@ -9,15 +9,14 @@ import (
 
 func cleanupExistingInstall() {
 	cleanupNotifierForSudoUser()
-
-	_ = command.Run("systemctl", "stop", model.ServiceName)
-	_ = command.Run("systemctl", "disable", model.ServiceName)
+	_ = command.RunSilent("systemctl", "stop", model.ServiceName)
+	_ = command.RunSilent("systemctl", "disable", model.ServiceName)
 	_ = os.Remove(model.ServicePath)
 	_ = os.Remove(model.NotifierServicePath)
 	_ = os.Remove(model.AliasPath)
 	_ = os.Remove(model.BinaryPath)
-	_ = command.Run("systemctl", "daemon-reload")
-	_ = command.Run("systemctl", "reset-failed", model.ServiceName)
+	_ = command.RunSilent("systemctl", "daemon-reload")
+	_ = command.RunSilent("systemctl", "reset-failed", model.ServiceName)
 }
 
 func cleanupNotifierForSudoUser() {
@@ -38,7 +37,7 @@ func cleanupNotifierForSudoUser() {
 
 	envPrefix := "XDG_RUNTIME_DIR=" + runtimeDir
 
-	_ = command.Run(
+	_ = command.RunSilent(
 		"runuser",
 		"-u",
 		username,
@@ -52,7 +51,7 @@ func cleanupNotifierForSudoUser() {
 		model.NotifierServiceName,
 	)
 
-	_ = command.Run(
+	_ = command.RunSilent(
 		"runuser",
 		"-u",
 		username,

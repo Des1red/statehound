@@ -3,7 +3,6 @@ package statehound
 import (
 	"fmt"
 	"statehound/internal/logger"
-	"statehound/internal/notify"
 	"statehound/internal/statehound/collector"
 	"statehound/internal/statehound/events"
 	"statehound/internal/statehound/filter"
@@ -19,7 +18,7 @@ type Manager struct {
 	previous *collector.Snapshot
 	lastScan time.Time
 
-	notifications []notify.Notification
+	notifications []Notification
 	filter        filter.DiffFilter
 }
 
