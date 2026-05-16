@@ -2,11 +2,11 @@ package statehound
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
 	"statehound/internal/statehound/collector"
 	"statehound/internal/statehound/formatter"
+	"statehound/internal/statehound/utils"
 )
 
 func (m *Manager) Snapshot() string {
@@ -35,7 +35,7 @@ func (m *Manager) Snapshot() string {
 
 	out = append(out, "")
 	out = append(out, "Active services:")
-	activeServices := sortedActiveServices(snapshot.Services)
+	activeServices := utils.SortedActiveServices(snapshot.Services)
 	if len(activeServices) == 0 {
 		out = append(out, "  none")
 	} else {
@@ -46,7 +46,7 @@ func (m *Manager) Snapshot() string {
 
 	out = append(out, "")
 	out = append(out, "Listening ports:")
-	ports := sortedPorts(snapshot.Ports)
+	ports := utils.SortedPorts(snapshot.Ports)
 	if len(ports) == 0 {
 		out = append(out, "  none")
 	} else {
@@ -57,7 +57,7 @@ func (m *Manager) Snapshot() string {
 
 	out = append(out, "")
 	out = append(out, "Watched files:")
-	files := sortedFiles(snapshot.Files)
+	files := utils.SortedFiles(snapshot.Files)
 	if len(files) == 0 {
 		out = append(out, "  none")
 	} else {
@@ -68,7 +68,7 @@ func (m *Manager) Snapshot() string {
 
 	out = append(out, "")
 	out = append(out, "Connections:")
-	connections := sortedConnections(snapshot.Connections)
+	connections := utils.SortedConnections(snapshot.Connections)
 	if len(connections) == 0 {
 		out = append(out, "  none")
 	} else {
@@ -79,7 +79,7 @@ func (m *Manager) Snapshot() string {
 
 	out = append(out, "")
 	out = append(out, "Processes:")
-	processes := sortedProcesses(snapshot.Processes)
+	processes := utils.SortedProcesses(snapshot.Processes)
 	if len(processes) == 0 {
 		out = append(out, "  none")
 	} else {
@@ -89,80 +89,4 @@ func (m *Manager) Snapshot() string {
 	}
 
 	return strings.Join(out, "\n")
-}
-
-func sortedActiveServices(services map[string]collector.Service) []collector.Service {
-	out := make([]collector.Service, 0)
-
-	for _, service := range services {
-		if service.ActiveState == "active" {
-			out = append(out, service)
-		}
-	}
-
-	sort.Slice(out, func(i, j int) bool {
-		return out[i].Name < out[j].Name
-	})
-
-	return out
-}
-
-func sortedPorts(ports map[string]collector.Port) []collector.Port {
-	out := make([]collector.Port, 0, len(ports))
-
-	for _, port := range ports {
-		out = append(out, port)
-	}
-
-	sort.Slice(out, func(i, j int) bool {
-		a := out[i].Proto + out[i].Address + out[i].Port
-		b := out[j].Proto + out[j].Address + out[j].Port
-		return a < b
-	})
-
-	return out
-}
-
-func sortedFiles(files map[string]collector.FileWatch) []collector.FileWatch {
-	out := make([]collector.FileWatch, 0, len(files))
-
-	for _, file := range files {
-		out = append(out, file)
-	}
-
-	sort.Slice(out, func(i, j int) bool {
-		return out[i].Path < out[j].Path
-	})
-
-	return out
-}
-
-func sortedConnections(connections map[string]collector.Connection) []collector.Connection {
-	out := make([]collector.Connection, 0, len(connections))
-
-	for _, conn := range connections {
-		out = append(out, conn)
-	}
-
-	sort.Slice(out, func(i, j int) bool {
-		a := out[i].LocalAddress + out[i].LocalPort + out[i].RemoteAddress + out[i].RemotePort + out[i].PID
-		b := out[j].LocalAddress + out[j].LocalPort + out[j].RemoteAddress + out[j].RemotePort + out[j].PID
-		return a < b
-	})
-
-	return out
-}
-
-func sortedProcesses(processes map[string]collector.Process) []collector.Process {
-	out := make([]collector.Process, 0, len(processes))
-
-	for _, process := range processes {
-		out = append(out, process)
-	}
-
-	sort.Slice(out, func(i, j int) bool {
-		return out[i].PID < out[j].PID
-	})
-
-	return out
 }

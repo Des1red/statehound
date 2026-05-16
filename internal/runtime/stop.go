@@ -1,28 +1,27 @@
 package runtime
 
 import (
-	"fmt"
-
 	"statehound/internal/client"
 	"statehound/internal/command"
+	"statehound/internal/logger"
 	"statehound/internal/model"
 )
 
 func Stop() {
 	if !client.IsRunning() {
-		fmt.Println("[*] statehound is already stopped")
+		logger.Status("statehound is already stopped")
 		return
 	}
 
 	if err := command.Run("systemctl", "stop", model.ServiceName); err != nil {
-		fmt.Println("[!] failed to stop statehound:", err)
+		logger.Failed("[!] failed to stop statehound:", err)
 		return
 	}
 
 	if client.IsRunning() {
-		fmt.Println("[!] statehound stop command was sent, but daemon is still responding")
+		logger.Failed("[!] statehound stop command was sent, but daemon is still responding", nil)
 		return
 	}
 
-	fmt.Println("[+] statehound stopped")
+	logger.Success("[+] statehound stopped")
 }

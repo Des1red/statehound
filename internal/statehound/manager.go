@@ -26,7 +26,7 @@ type Manager struct {
 func NewManager(interval time.Duration) *Manager {
 	return &Manager{
 		interval: interval,
-		filter:   buildFilter(),
+		filter:   filter.BuildFilter(),
 	}
 }
 

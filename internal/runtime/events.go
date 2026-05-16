@@ -23,7 +23,7 @@ func ShowEvents(filter string) {
 }
 
 func ClearEvents() {
-	if err := os.WriteFile(model.EventPath, []byte{}, 0600); err != nil {
+	if err := os.WriteFile(model.EventPath, []byte{}, 0640); err != nil {
 		logger.Failed("failed to clear statehound events", err)
 		return
 	}

@@ -27,7 +27,7 @@ func createFiles() error {
 	}
 
 	if _, err := os.Stat(model.EventPath); os.IsNotExist(err) {
-		if err := os.WriteFile(model.EventPath, []byte{}, 0600); err != nil {
+		if err := os.WriteFile(model.EventPath, []byte{}, 0640); err != nil {
 			return fmt.Errorf("failed to create event log file: %w", err)
 		}
 	}

@@ -3,7 +3,6 @@ package notify
 import (
 	"bufio"
 	"os/exec"
-	"statehound/internal/logger"
 	"strings"
 )
 
@@ -43,7 +42,6 @@ func Start(title, message, urgency string) (*Session, error) {
 		scanner := bufio.NewScanner(stdout)
 		if scanner.Scan() {
 			id := strings.TrimSpace(scanner.Text())
-			logger.Status("notification id: " + id)
 			idCh <- id
 		} else {
 			idCh <- ""
@@ -52,7 +50,6 @@ func Start(title, message, urgency string) (*Session, error) {
 		action := ""
 		if scanner.Scan() {
 			action = strings.TrimSpace(scanner.Text())
-			logger.Status("notification action received: " + action)
 		}
 
 		cmd.Wait()
