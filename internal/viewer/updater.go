@@ -61,32 +61,43 @@ func startEventWatcher(done <-chan struct{}) {
 
 func collectTabUpdates() []tabUpdate {
 	viewerMu.Lock()
-	defer viewerMu.Unlock()
-
 	s := session
 	if s == nil {
+		viewerMu.Unlock()
 		return nil
 	}
 
-	var updates []tabUpdate
+	offset := s.fileOffset
+	viewerMu.Unlock()
 
-	for _, t := range tabs {
-		tab := s.tabs[t.urgency]
-		if tab == nil {
-			continue
+	lines, newOffset, err := events.EventsSince(offset)
+	if err != nil || len(lines) == 0 {
+		return nil
+	}
+
+	updatesByUrgency := make(map[string][]string)
+
+	for _, line := range lines {
+		for _, t := range tabs {
+			tag := "[" + t.urgency + "]"
+			if strings.Contains(line, tag) {
+				updatesByUrgency[t.urgency] = append(updatesByUrgency[t.urgency], line)
+			}
 		}
+	}
 
-		content, _ := events.FilterEvents(t.urgency)
-		lines := strings.Split(strings.TrimSpace(content), "\n")
+	viewerMu.Lock()
+	if session != nil {
+		session.fileOffset = newOffset
+	}
+	viewerMu.Unlock()
 
-		if len(lines) > tab.lastLines {
-			newLines := make([]string, len(lines)-tab.lastLines)
-			copy(newLines, lines[tab.lastLines:])
-			tab.lastLines = len(lines)
-
+	var updates []tabUpdate
+	for _, t := range tabs {
+		if tabLines := updatesByUrgency[t.urgency]; len(tabLines) > 0 {
 			updates = append(updates, tabUpdate{
 				urgency: t.urgency,
-				lines:   newLines,
+				lines:   tabLines,
 			})
 		}
 	}

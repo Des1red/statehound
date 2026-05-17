@@ -53,9 +53,8 @@ func startTab(key int, t tabConfig) (*tabSession, error) {
 	}
 
 	return &tabSession{
-		cmd:       cmd,
-		stdin:     stdin,
-		lastLines: len(lines),
+		cmd:   cmd,
+		stdin: stdin,
 	}, nil
 }
 

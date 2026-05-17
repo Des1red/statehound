@@ -2,9 +2,11 @@ package viewer
 
 import (
 	"math/rand"
+	"os"
 	"time"
 
 	"statehound/internal/logger"
+	"statehound/internal/model"
 )
 
 func Show(urgency string) {
@@ -39,11 +41,18 @@ func Show(urgency string) {
 
 	updateCh := make(chan tabUpdate, 32)
 
+	info, err := os.Stat(model.EventPath)
+	if err != nil {
+		killTabs(tabSessions)
+		logger.Failed("viewer: failed to stat event file", err)
+		return
+	}
 	viewerMu.Lock()
 	session = &viewerSession{
-		notebook: notebook,
-		tabs:     tabSessions,
-		updateCh: updateCh,
+		notebook:   notebook,
+		tabs:       tabSessions,
+		updateCh:   updateCh,
+		fileOffset: info.Size(),
 	}
 	viewerMu.Unlock()
 

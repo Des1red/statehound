@@ -7,15 +7,15 @@ import (
 )
 
 type tabSession struct {
-	cmd       *exec.Cmd
-	stdin     io.WriteCloser
-	lastLines int
+	cmd   *exec.Cmd
+	stdin io.WriteCloser
 }
 
 type viewerSession struct {
-	notebook *exec.Cmd
-	tabs     map[string]*tabSession
-	updateCh chan tabUpdate
+	notebook   *exec.Cmd
+	tabs       map[string]*tabSession
+	updateCh   chan tabUpdate
+	fileOffset int64
 }
 
 type tabUpdate struct {
