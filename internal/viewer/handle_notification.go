@@ -3,19 +3,7 @@ package viewer
 import (
 	"fmt"
 	"statehound/internal/statehound"
-	"sync"
 )
-
-type urgencyState struct {
-	mu      sync.Mutex
-	count   int
-	session *Session
-}
-
-var states = map[string]*urgencyState{
-	"critical": {},
-	"normal":   {},
-}
 
 func HandleNotifications(notifications []statehound.Notification) {
 	counts := map[string]int{}
