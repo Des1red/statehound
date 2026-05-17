@@ -7,6 +7,7 @@ import (
 	"statehound/internal/logger"
 	"statehound/internal/model"
 	"statehound/internal/statehound/events"
+	"statehound/internal/system"
 	"statehound/internal/viewer"
 )
 
@@ -24,6 +25,10 @@ func ShowEvents(filter string) {
 }
 
 func EventsGUI(filter string) {
+	if system.IsHeadless() {
+		logger.Warn("no display available — use --events instead")
+		return
+	}
 	if filter == "" || (filter != "critical" && filter != "normal") {
 		filter = "critical"
 	}

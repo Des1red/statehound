@@ -8,9 +8,13 @@ import (
 	"statehound/internal/command"
 	"statehound/internal/logger"
 	"statehound/internal/model"
+	"statehound/internal/system"
 )
 
 func setupNotifierForSudoUser() error {
+	if system.IsHeadless() {
+		return nil
+	}
 	username := os.Getenv("SUDO_USER")
 	if username == "" || username == "root" {
 		return fmt.Errorf("could not detect desktop user from SUDO_USER")

@@ -6,6 +6,7 @@ import (
 	"statehound/internal/logger"
 	"statehound/internal/model"
 	"statehound/internal/statehound"
+	"statehound/internal/system"
 )
 
 func Run() {
@@ -19,11 +20,13 @@ func Run() {
 		return
 	}
 
-	go func() {
-		if err := startNotifySocket(model.NotifySocketPath, manager); err != nil {
-			logger.Failed("statehound notify socket error", err)
-		}
-	}()
+	if !system.IsHeadless() {
+		go func() {
+			if err := startNotifySocket(model.NotifySocketPath, manager); err != nil {
+				logger.Failed("statehound notify socket error", err)
+			}
+		}()
+	}
 
 	if err := startControlSocket(model.ControlSocketPath, manager); err != nil {
 		logger.Failed("statehound socket error", err)

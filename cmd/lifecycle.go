@@ -142,5 +142,5 @@ func snapshot() {
 	if !bootstrap.VerifyInstallation() {
 		return
 	}
-	runtime.SnapshotGUI()
+	runtime.Snapshot()
 }

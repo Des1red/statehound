@@ -10,6 +10,7 @@ import (
 	"statehound/internal/command"
 	"statehound/internal/logger"
 	"statehound/internal/model"
+	"statehound/internal/system"
 )
 
 type distroFamily int
@@ -53,6 +54,15 @@ var deps = map[string]depInfo{
 			distroDebian: "yad",
 			distroArch:   "yad",
 			distroSUSE:   "yad",
+		},
+	},
+	"xdg-utils": {
+		CheckCmd: []string{"which", "xdg-open"},
+		Packages: map[distroFamily]string{
+			distroFedora: "xdg-utils",
+			distroDebian: "xdg-utils",
+			distroArch:   "xdg-utils",
+			distroSUSE:   "xdg-utils",
 		},
 	},
 }
@@ -165,13 +175,26 @@ func containsAny(s string, needles ...string) bool {
 }
 
 func checkDeps() []string {
+	headless := system.IsHeadless()
+
 	var missing []string
 	for name, dep := range deps {
+		if headless && isGUIDep(name) {
+			continue
+		}
 		if _, err := command.Output(dep.CheckCmd[0], dep.CheckCmd[1:]...); err != nil {
 			missing = append(missing, name)
 		}
 	}
 	return missing
+}
+
+func isGUIDep(name string) bool {
+	switch name {
+	case "yad", "xdg-utils":
+		return true
+	}
+	return false
 }
 
 func installDeps(distro distroFamily, missing []string) error {

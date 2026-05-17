@@ -6,6 +6,7 @@ import (
 	"statehound/internal/statehound/diff"
 	"statehound/internal/statehound/events"
 	"statehound/internal/statehound/signals"
+	"statehound/internal/system"
 	"strconv"
 	"time"
 )
@@ -65,9 +66,11 @@ func (m *Manager) tick() {
 		logger.Failed("failed to write events", err)
 	}
 
-	notifications := eventsToNotifications(result.Notifications)
-	for _, n := range notifications {
-		m.PushNotification(n)
+	if !system.IsHeadless() {
+		notifications := eventsToNotifications(result.Notifications)
+		for _, n := range notifications {
+			m.PushNotification(n)
+		}
 	}
 
 	m.mu.Lock()

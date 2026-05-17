@@ -3,6 +3,7 @@ package filter
 import (
 	"statehound/internal/statehound/events"
 	"statehound/internal/statehound/signals"
+	"statehound/internal/system"
 )
 
 // DiffFilter holds filters for each diff type
@@ -86,7 +87,7 @@ func (df *DiffFilter) Filter(evts []events.Event) Result {
 
 		if keep {
 			res.LogEvents = append(res.LogEvents, e)
-			if e.Urgency != "" {
+			if e.Urgency != "" && !system.IsHeadless() {
 				res.Notifications = append(res.Notifications, e)
 			}
 		}

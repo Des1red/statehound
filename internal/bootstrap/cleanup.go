@@ -5,6 +5,7 @@ import (
 	"os/user"
 	"statehound/internal/command"
 	"statehound/internal/model"
+	"statehound/internal/system"
 )
 
 func cleanupExistingInstall() {
@@ -12,7 +13,9 @@ func cleanupExistingInstall() {
 	_ = command.RunSilent("systemctl", "stop", model.ServiceName)
 	_ = command.RunSilent("systemctl", "disable", model.ServiceName)
 	_ = os.Remove(model.ServicePath)
-	_ = os.Remove(model.NotifierServicePath)
+	if !system.IsHeadless() {
+		_ = os.Remove(model.NotifierServicePath)
+	}
 	_ = os.Remove(model.AliasPath)
 	_ = os.Remove(model.BinaryPath)
 	_ = command.RunSilent("systemctl", "daemon-reload")
@@ -20,6 +23,10 @@ func cleanupExistingInstall() {
 }
 
 func cleanupNotifierForSudoUser() {
+	if system.IsHeadless() {
+		return
+	}
+
 	username := os.Getenv("SUDO_USER")
 	if username == "" || username == "root" {
 		return

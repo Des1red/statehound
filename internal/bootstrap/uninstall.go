@@ -6,6 +6,7 @@ import (
 	"statehound/internal/command"
 	"statehound/internal/logger"
 	"statehound/internal/model"
+	"statehound/internal/system"
 )
 
 func Uninstall(purge bool) {
@@ -26,9 +27,11 @@ func Uninstall(purge bool) {
 		return
 	}
 
-	if err := os.Remove(model.NotifierServicePath); err != nil && !os.IsNotExist(err) {
-		logger.Failed("failed to remove notifier user service", err)
-		return
+	if !system.IsHeadless() {
+		if err := os.Remove(model.NotifierServicePath); err != nil && !os.IsNotExist(err) {
+			logger.Failed("failed to remove notifier user service", err)
+			return
+		}
 	}
 
 	if err := os.Remove(model.AliasPath); err != nil && !os.IsNotExist(err) {

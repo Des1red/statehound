@@ -5,6 +5,7 @@ import (
 
 	"statehound/internal/logger"
 	"statehound/internal/model"
+	"statehound/internal/system"
 )
 
 func VerifyInstallation() bool {
@@ -12,11 +13,14 @@ func VerifyInstallation() bool {
 		model.BinaryPath,
 		model.AliasPath,
 		model.ServicePath,
-		model.NotifierServicePath,
 		model.ConfigDir,
 		model.LogDir,
 		model.EventBackupDir,
 		model.EventPath,
+	}
+
+	if !system.IsHeadless() {
+		required = append(required, model.NotifierServicePath)
 	}
 
 	for _, path := range required {

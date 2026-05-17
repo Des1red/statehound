@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/user"
 	"statehound/internal/model"
+	"statehound/internal/system"
 	"strconv"
 )
 
@@ -14,8 +15,10 @@ func createFiles() error {
 		return fmt.Errorf("failed to write systemd service: %w", err)
 	}
 
-	if err := os.WriteFile(model.NotifierServicePath, []byte(notifierUnit), 0644); err != nil {
-		return fmt.Errorf("failed to write notifier user service: %w", err)
+	if !system.IsHeadless() {
+		if err := os.WriteFile(model.NotifierServicePath, []byte(notifierUnit), 0644); err != nil {
+			return fmt.Errorf("failed to write notifier user service: %w", err)
+		}
 	}
 
 	if err := os.MkdirAll(model.ConfigDir, 0700); err != nil {
@@ -46,6 +49,7 @@ func createFiles() error {
 }
 
 func enforcePermissions() error {
+	headless := system.IsHeadless()
 
 	if err := os.Chown(model.BinaryPath, 0, 0); err != nil {
 		return fmt.Errorf("failed to set binary owner: %w", err)
@@ -61,11 +65,13 @@ func enforcePermissions() error {
 		return fmt.Errorf("failed to set service permissions: %w", err)
 	}
 
-	if err := os.Chown(model.NotifierServicePath, 0, 0); err != nil {
-		return fmt.Errorf("failed to set notifier service owner: %w", err)
-	}
-	if err := os.Chmod(model.NotifierServicePath, 0644); err != nil {
-		return fmt.Errorf("failed to set notifier service permissions: %w", err)
+	if !headless {
+		if err := os.Chown(model.NotifierServicePath, 0, 0); err != nil {
+			return fmt.Errorf("failed to set notifier service owner: %w", err)
+		}
+		if err := os.Chmod(model.NotifierServicePath, 0644); err != nil {
+			return fmt.Errorf("failed to set notifier service permissions: %w", err)
+		}
 	}
 
 	if err := os.Chown(model.ConfigDir, 0, 0); err != nil {
@@ -75,18 +81,45 @@ func enforcePermissions() error {
 		return fmt.Errorf("failed to set config directory permissions: %w", err)
 	}
 
-	if err := os.Chown(model.LogDir, 0, getGroupId()); err != nil {
-		return fmt.Errorf("failed to set log directory owner: %w", err)
-	}
-	if err := os.Chmod(model.LogDir, 0750); err != nil {
-		return fmt.Errorf("failed to set log directory permissions: %w", err)
-	}
-
-	if err := os.Chown(model.EventPath, 0, getGroupId()); err != nil {
-		return fmt.Errorf("failed to set event log owner: %w", err)
-	}
-	if err := os.Chmod(model.EventPath, 0640); err != nil {
-		return fmt.Errorf("failed to set event log permissions: %w", err)
+	if headless {
+		if err := os.Chown(model.LogDir, 0, 0); err != nil {
+			return fmt.Errorf("failed to set log directory owner: %w", err)
+		}
+		if err := os.Chmod(model.LogDir, 0700); err != nil {
+			return fmt.Errorf("failed to set log directory permissions: %w", err)
+		}
+		if err := os.Chown(model.EventPath, 0, 0); err != nil {
+			return fmt.Errorf("failed to set event log owner: %w", err)
+		}
+		if err := os.Chmod(model.EventPath, 0600); err != nil {
+			return fmt.Errorf("failed to set event log permissions: %w", err)
+		}
+		if err := os.Chown(model.EventBackupDir, 0, 0); err != nil {
+			return fmt.Errorf("failed to set event backup directory owner: %w", err)
+		}
+		if err := os.Chmod(model.EventBackupDir, 0700); err != nil {
+			return fmt.Errorf("failed to set event backup directory permissions: %w", err)
+		}
+	} else {
+		gid := getGroupId()
+		if err := os.Chown(model.LogDir, 0, gid); err != nil {
+			return fmt.Errorf("failed to set log directory owner: %w", err)
+		}
+		if err := os.Chmod(model.LogDir, 0750); err != nil {
+			return fmt.Errorf("failed to set log directory permissions: %w", err)
+		}
+		if err := os.Chown(model.EventPath, 0, gid); err != nil {
+			return fmt.Errorf("failed to set event log owner: %w", err)
+		}
+		if err := os.Chmod(model.EventPath, 0640); err != nil {
+			return fmt.Errorf("failed to set event log permissions: %w", err)
+		}
+		if err := os.Chown(model.EventBackupDir, 0, gid); err != nil {
+			return fmt.Errorf("failed to set event backup directory owner: %w", err)
+		}
+		if err := os.Chmod(model.EventBackupDir, 0750); err != nil {
+			return fmt.Errorf("failed to set event backup directory permissions: %w", err)
+		}
 	}
 
 	if err := os.Chown(model.InstalledDepsPath, 0, 0); err != nil {
@@ -94,13 +127,6 @@ func enforcePermissions() error {
 	}
 	if err := os.Chmod(model.InstalledDepsPath, 0600); err != nil {
 		return fmt.Errorf("failed to set installed deps file permissions: %w", err)
-	}
-
-	if err := os.Chown(model.EventBackupDir, 0, getGroupId()); err != nil {
-		return fmt.Errorf("failed to set event backup directory owner: %w", err)
-	}
-	if err := os.Chmod(model.EventBackupDir, 0750); err != nil {
-		return fmt.Errorf("failed to set event backup directory permissions: %w", err)
 	}
 
 	return nil

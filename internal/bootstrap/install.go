@@ -7,6 +7,7 @@ import (
 	"statehound/internal/command"
 	"statehound/internal/logger"
 	"statehound/internal/model"
+	"statehound/internal/system"
 )
 
 const unit = `[Unit]
@@ -52,9 +53,11 @@ func Install() {
 		return
 	}
 
-	if err := ensureGroup(); err != nil {
-		logger.Failed("", err)
-		return
+	if !system.IsHeadless() {
+		if err := ensureGroup(); err != nil {
+			logger.Failed("", err)
+			return
+		}
 	}
 
 	if err := createFiles(); err != nil {

@@ -7,10 +7,14 @@ import (
 	"statehound/internal/client"
 	"statehound/internal/logger"
 	"statehound/internal/statehound"
+	"statehound/internal/system"
 	"statehound/internal/viewer"
 )
 
 func Notify() {
+	if system.IsHeadless() {
+		return
+	}
 	logger.Status("statehound desktop notifier started")
 
 	for {
