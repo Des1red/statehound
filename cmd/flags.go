@@ -32,6 +32,8 @@ func flags() model.Flags {
 	fs.BoolVar(&f.CLI.Snapshot, "snapshot", false, "show current statehound snapshot")
 	fs.StringVar(&f.CLI.Hunt, "hunt", "", "investigate a service, process, pid, or port")
 
+	fs.BoolVar(&f.CLI.Web, "web", false, "start web dashboard")
+
 	fs.BoolVar(&f.Runtime.Daemon, "daemon", false, "run statehound daemon")
 	fs.BoolVar(&f.Runtime.Notify, "notify", false, "run statehound desktop notifier")
 	fs.BoolVar(&f.CLI.Verbose, "verbose", false, "enable verbose output")
@@ -86,6 +88,8 @@ func handleFlags() {
 		eventsGUI(f.CLI.Filter)
 	case f.CLI.Hunt != "":
 		hunt(f.CLI.Hunt)
+	case f.CLI.Web:
+		web()
 	default:
 		printHelp()
 	}

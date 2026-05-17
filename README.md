@@ -40,7 +40,7 @@ sudo go run . --install
 
 This builds the binary, installs it to `/usr/local/bin/statehound`, creates the systemd service, enables it, and starts the daemon. A `shound` alias is also created for convenience.
 
-Missing dependencies (yad, notify-send, acl) are installed automatically for Fedora, Debian/Ubuntu/Kali, Arch, and openSUSE.
+Missing dependencies (yad, notify-send, acl, xdg-utils) are installed automatically for Fedora, Debian/Ubuntu/Kali, Arch, and openSUSE. On headless systems, GUI dependencies are skipped automatically.
 
 ---
 
@@ -52,7 +52,8 @@ sudo shound --events               # show all recorded events
 sudo shound --events -f critical   # show critical events only
 sudo shound --events -f normal     # show normal events only
 sudo shound --events-gui           # open graphical event viewer
-sudo shound --snapshot             # full current system snapshot
+sudo shound --snapshot             # open snapshot in graphical viewer
+sudo shound --web                  # start web dashboard at http://127.0.0.1:7777
 sudo shound --hunt <target>        # search live state by name, port, or pid
 sudo shound --logs                 # systemd journal logs for the daemon
 sudo shound --clear-events         # clear the event log
@@ -79,9 +80,9 @@ sudo shound --hunt proxychan
 Events are written to `/var/log/statehound/events.log` in a simple, readable format:
 
 ```
-[2026-05-11T03:01:14+03:00] SERVICE_STARTED [normal] proxychan.service desc="ProxyChan SOCKS5 Proxy" load=loaded state=active/running transition=inactive/dead->active/running
-[2026-05-11T03:01:19+03:00] PORT_OPENED [normal] tcp 127.0.0.1:1080 scope=local process=proxychan pid=84761 exe=/usr/local/bin/proxychan
-[2026-05-11T03:04:02+03:00] FILE_ADDED [critical] /etc/cron.d/backdoor size=42 mode=-rw-r--r-- hash=9f3a...
+[2026-05-11T03:01:14+03:00] [normal] SERVICE_STARTED proxychan.service desc="ProxyChan SOCKS5 Proxy" load=loaded state=active/running transition=inactive/dead->active/running
+[2026-05-11T03:01:19+03:00] [normal] PORT_OPENED tcp 127.0.0.1:1080 scope=local process=proxychan pid=84761 exe=/usr/local/bin/proxychan
+[2026-05-11T03:04:02+03:00] [critical] FILE_ADDED /etc/cron.d/backdoor size=42 mode=-rw-r--r-- hash=9f3a...
 ```
 
 The log rotates automatically at 5 MB and backups are kept for 30 days.
@@ -117,7 +118,32 @@ sudo shound --events-gui           # open on critical tab
 sudo shound --events-gui -f normal # open on normal tab
 ```
 
-The notifier is installed automatically for the detected desktop user when running `--install`.
+The notifier is installed automatically for the detected desktop user when running `--install`. On headless systems the notifier is skipped entirely.
+
+---
+
+## Web dashboard
+
+Statehound includes a local web dashboard that brings events, snapshot, and hunt into one interface:
+
+```bash
+sudo shound --web
+```
+
+Starts an HTTP server bound to `127.0.0.1:7777` (or the next available port if taken) and prints the URL. Open it in any browser.
+
+The dashboard shows:
+- **Events** — live feed of all events, filtered by urgency tab, updating every 2 seconds
+- **Snapshot** — current system state with manual refresh
+- **Hunt** — click any event to investigate it against live state, results appear in a popup
+
+The web server is on-demand only — it runs while the command is active and stops when you exit.
+
+---
+
+## Headless support
+
+On systems without a graphical environment, statehound automatically skips GUI dependencies and the desktop notifier. All CLI commands work normally. The web dashboard is available on headless systems too — just open the URL via SSH tunnelling.
 
 ---
 
@@ -135,3 +161,17 @@ sudo shound --uninstall --purge  # remove everything including logs
 The daemon runs as root. The control socket is root-only and verifies peer credentials on every connection. Normal users cannot query or influence statehound's runtime state.
 
 The `statehound` group is created during install. The desktop user is added to this group, giving them read access to the event log and the notification socket — nothing else. No other users can access these.
+
+On headless systems the group is not created since there is no notifier user to add to it.
+
+```
+/usr/local/bin/statehound               root:root         0755
+/etc/systemd/system/statehound.service  root:root         0644
+/etc/statehound/                        root:root         0700
+/var/log/statehound/                    root:statehound   0750  (desktop)
+/var/log/statehound/                    root:root         0700  (headless)
+/var/log/statehound/events.log          root:statehound   0640  (desktop)
+/var/log/statehound/events.log          root:root         0600  (headless)
+/run/statehound/statehound.sock         root:root         0600
+/run/statehound/notify.sock             root:statehound   0660  (desktop only)
+```

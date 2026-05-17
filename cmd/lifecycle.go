@@ -30,6 +30,7 @@ func printHelp() {
 	fmt.Println("  statehound --clear-events")
 	fmt.Println("  statehound --hunt sshd.service")
 	fmt.Println("  statehound --hunt 4444")
+	fmt.Println("  statehound --web")
 	fmt.Println()
 	fmt.Println("Options:")
 	fmt.Println("  -h, --help            show help")
@@ -48,6 +49,7 @@ func printHelp() {
 	fmt.Println("      --events-gui      open graphical event viewer")
 	fmt.Println("      --clear-events    clear statehound event log")
 	fmt.Println("      --hunt string     investigate a service, process, pid, or port")
+	fmt.Println("      --web             start web dashboard at http://127.0.0.1:7777")
 	fmt.Println("      --verbose         enable verbose output")
 }
 
@@ -143,4 +145,11 @@ func snapshot() {
 		return
 	}
 	runtime.Snapshot()
+}
+
+func web() {
+	if !bootstrap.VerifyInstallation() {
+		return
+	}
+	runtime.Web()
 }

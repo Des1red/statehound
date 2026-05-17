@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>statehound</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <span class="logo-mark">▸</span>
+      statehound
+    </div>
+    <div class="header-right">
+      <span class="live-badge">
+        <span class="live-dot"></span>
+        live
+      </span>
+    </div>
+  </header>
+
+  <main>
+    <section class="events-section">
+      <div class="section-header">
+        <h2>Events</h2>
+        <div class="tab-bar">
+          <button class="tab active" data-tab="all">All</button>
+          <button class="tab" data-tab="critical">
+            Critical
+            <span class="count" id="critical-count">0</span>
+          </button>
+          <button class="tab" data-tab="normal">
+            Normal
+            <span class="count" id="normal-count">0</span>
+          </button>
+        </div>
+      </div>
+      <div class="events-container" id="events-container">
+        <div class="empty-state" id="events-empty">no events recorded yet</div>
+      </div>
+    </section>
+
+    <section class="snapshot-section">
+      <div class="section-header">
+        <h2>Snapshot</h2>
+        <button class="refresh-btn" id="refresh-snapshot">↻ Refresh</button>
+      </div>
+      <div class="snapshot-container" id="snapshot-container">
+        <div class="empty-state">loading snapshot...</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Hunt Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="modal-icon">⬡</span>
+          hunt
+          <span class="modal-target" id="modal-target"></span>
+        </div>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <div class="empty-state">searching...</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

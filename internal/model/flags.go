@@ -22,6 +22,8 @@ type CLIFlags struct {
 	ClearEvents bool
 	Filter      string
 
+	Web bool
+
 	Verbose bool // unused
 }
 
