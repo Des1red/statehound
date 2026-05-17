@@ -23,8 +23,10 @@ func printHelp() {
 	fmt.Println("  statehound --logs")
 	fmt.Println("  statehound --snapshot")
 	fmt.Println("  statehound --events")
-	fmt.Println("  statehound --events --filter critical")
+	fmt.Println("  statehound --events -f critical")
 	fmt.Println("  statehound --events -f normal")
+	fmt.Println("  statehound --events-gui")
+	fmt.Println("  statehound --events-gui -f normal")
 	fmt.Println("  statehound --clear-events")
 	fmt.Println("  statehound --hunt sshd.service")
 	fmt.Println("  statehound --hunt 4444")
@@ -40,9 +42,10 @@ func printHelp() {
 	fmt.Println("      --restart         restart statehound service")
 	fmt.Println("      --status          show statehound daemon status")
 	fmt.Println("      --logs            show statehound logs")
-	fmt.Println("      --snapshot        show full current statehound snapshot")
-	fmt.Println("      --events          show statehound events")
+	fmt.Println("      --snapshot        show current snapshot in graphical viewer")
+	fmt.Println("      --events          show statehound events in terminal")
 	fmt.Println("  -f, --filter string   filter events by urgency: critical, normal")
+	fmt.Println("      --events-gui      open graphical event viewer")
 	fmt.Println("      --clear-events    clear statehound event log")
 	fmt.Println("      --hunt string     investigate a service, process, pid, or port")
 	fmt.Println("      --verbose         enable verbose output")
@@ -139,5 +142,5 @@ func snapshot() {
 	if !bootstrap.VerifyInstallation() {
 		return
 	}
-	runtime.Snapshot()
+	runtime.SnapshotGUI()
 }

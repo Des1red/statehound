@@ -1,18 +1,12 @@
 package runtime
 
 import (
-	"fmt"
-
 	"statehound/internal/client"
-	"statehound/internal/logger"
+	"statehound/internal/viewer"
 )
 
-func Snapshot() {
-	resp, err := client.Send("SNAPSHOT")
-	if err != nil {
-		logger.Failed("failed to read statehound snapshot", err)
-		return
-	}
-
-	fmt.Println(resp)
+func SnapshotGUI() {
+	viewer.ShowSnapshot(func() (string, error) {
+		return client.Send("SNAPSHOT")
+	})
 }
