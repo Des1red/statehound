@@ -43,15 +43,15 @@ func (m *Manager) Hunt(target string) string {
 
 	if len(serviceMatches) == 0 && len(portMatches) == 0 {
 		out = append(out, "no live matches found")
+	}
 
-		logMatches := hunt.HuntEvents(targetLower)
-		if len(logMatches) > 0 {
-			out = append(out, "")
-			out = append(out, "Found in event log:")
-			out = append(out, logMatches...)
-		} else {
-			out = append(out, "not found in event log either")
-		}
+	logMatches := hunt.HuntEvents(targetLower)
+	if len(logMatches) > 0 {
+		out = append(out, "")
+		out = append(out, "Found in event log:")
+		out = append(out, logMatches...)
+	} else if len(serviceMatches) == 0 && len(portMatches) == 0 {
+		out = append(out, "not found in event log either")
 	}
 
 	return strings.Join(out, "\n")
