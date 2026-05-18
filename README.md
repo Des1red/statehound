@@ -33,7 +33,7 @@ It is a visibility tool. It tells you what changed. What you do with that is up 
 **Requirements:** Linux with systemd, Go 1.21+
 
 ```bash
-git clone https://github.com/yourname/statehound
+git clone https://github.com/des1red/statehound
 cd statehound
 sudo go run . --install
 ```

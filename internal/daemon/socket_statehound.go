@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"statehound/internal/logger"
+	"statehound/internal/profiling"
 	"statehound/internal/statehound"
 	"strings"
 )
@@ -60,6 +61,8 @@ func handleConnection(conn net.Conn, manager *statehound.Manager) {
 	case strings.HasPrefix(msg, "HUNT "):
 		target := strings.TrimSpace(strings.TrimPrefix(msg, "HUNT "))
 		writeResponse(conn, manager.Hunt(target))
+	case msg == "PROFILE":
+		writeResponse(conn, profiling.Start())
 	default:
 		writeResponse(conn, "unknown command")
 	}

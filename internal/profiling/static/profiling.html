@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>statehound — profiling</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
+
+    :root {
+      --bg:       #0c0c0e;
+      --surface:  #111114;
+      --surface2: #18181c;
+      --border:   #1f1f24;
+      --border2:  #2a2a32;
+      --text:     #e2e2e8;
+      --muted:    #5a5a68;
+      --muted2:   #3a3a46;
+      --accent:   #f04040;
+      --blue:     #4a9eff;
+      --green:    #2ecc71;
+      --yellow:   #f5a623;
+      --mono:     'JetBrains Mono', monospace;
+      --sans:     'Syne', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      height: 56px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: var(--sans);
+      font-size: 16px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-mark { color: var(--accent); }
+
+    .logo-sub {
+      font-size: 11px;
+      font-family: var(--mono);
+      font-weight: 400;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+    }
+
+    .pid-badge {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    .pid-badge span { color: var(--text); }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 32px;
+    }
+
+    .section-title {
+      font-family: var(--sans);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.15s, background 0.15s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      border-color: var(--border2);
+      background: var(--surface2);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .card-tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 3px;
+      border: 1px solid;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .tag-memory  { color: var(--blue);   border-color: var(--blue);   background: rgba(74,158,255,0.08); }
+    .tag-cpu     { color: var(--accent); border-color: var(--accent); background: rgba(240,64,64,0.08); }
+    .tag-runtime { color: var(--green);  border-color: var(--green);  background: rgba(46,204,113,0.08); }
+    .tag-trace   { color: var(--yellow); border-color: var(--yellow); background: rgba(245,166,35,0.08); }
+
+    .card-desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .card-cmd {
+      font-size: 10px;
+      color: var(--muted2);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 8px;
+      margin-top: 4px;
+      word-break: break-all;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 32px 0;
+    }
+
+    .raw-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .raw-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 11px;
+      transition: all 0.15s;
+    }
+
+    .raw-link:hover {
+      color: var(--text);
+      border-color: var(--border2);
+      background: var(--surface);
+    }
+
+    .raw-link-name {
+      color: var(--text);
+      min-width: 160px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-mark">▸</span>
+    statehound
+    <span class="logo-sub">profiling</span>
+  </div>
+  <div class="pid-badge">daemon pid <span id="pid">—</span></div>
+</header>
+
+<main>
+
+  <div class="section-title">Profiles</div>
+  <div class="cards">
+
+    <a class="card" href="/debug/pprof/heap?debug=1" target="_blank">
+      <div class="card-header">
+        <span class="card-name">Heap</span>
+        <span class="card-tag tag-memory">memory</span>
+      </div>
+      <div class="card-desc">Current memory allocations. Shows what is holding memory and how much. Use to detect leaks.</div>
+      <div class="card-cmd">go tool pprof HOST/debug/pprof/heap</div>
+    </a>
+
+    <a class="card" href="/debug/pprof/allocs?debug=1" target="_blank">
+      <div class="card-header">
+        <span class="card-name">Allocs</span>
+        <span class="card-tag tag-memory">memory</span>
+      </div>
+      <div class="card-desc">All past memory allocations since startup. Helps identify high-churn allocation paths.</div>
+      <div class="card-cmd">go tool pprof HOST/debug/pprof/allocs</div>
+    </a>
+
+    <a class="card" href="/debug/pprof/profile?seconds=30" target="_blank">
+      <div class="card-header">
+        <span class="card-name">CPU</span>
+        <span class="card-tag tag-cpu">cpu</span>
+      </div>
+      <div class="card-desc">30 second CPU sample. Shows which functions are consuming processor time during a scan cycle.</div>
+      <div class="card-cmd">go tool pprof HOST/debug/pprof/profile?seconds=30</div>
+    </a>
+
+    <a class="card" href="/debug/pprof/goroutine?debug=1" target="_blank">
+      <div class="card-header">
+        <span class="card-name">Goroutines</span>
+        <span class="card-tag tag-runtime">runtime</span>
+      </div>
+      <div class="card-desc">All running goroutines and their stack traces. Use to detect leaks or unexpected goroutine growth.</div>
+      <div class="card-cmd">go tool pprof HOST/debug/pprof/goroutine</div>
+    </a>
+
+    <a class="card" href="/debug/pprof/block?debug=1" target="_blank">
+      <div class="card-header">
+        <span class="card-name">Block</span>
+        <span class="card-tag tag-runtime">runtime</span>
+      </div>
+      <div class="card-desc">Goroutine blocking events. Shows where goroutines wait on channels or mutexes.</div>
+      <div class="card-cmd">go tool pprof HOST/debug/pprof/block</div>
+    </a>
+
+    <a class="card" href="/debug/pprof/mutex?debug=1" target="_blank">
+      <div class="card-header">
+        <span class="card-name">Mutex</span>
+        <span class="card-tag tag-runtime">runtime</span>
+      </div>
+      <div class="card-desc">Mutex contention. Shows which locks are contested and causing goroutines to wait.</div>
+      <div class="card-cmd">go tool pprof HOST/debug/pprof/mutex</div>
+    </a>
+
+    <a class="card" href="/debug/pprof/trace?seconds=10" target="_blank">
+      <div class="card-header">
+        <span class="card-name">Trace</span>
+        <span class="card-tag tag-trace">trace</span>
+      </div>
+      <div class="card-desc">10 second execution trace. Full timeline of goroutine activity, GC, and system calls.</div>
+      <div class="card-cmd">go tool trace HOST/debug/pprof/trace?seconds=10</div>
+    </a>
+
+    <a class="card" href="/debug/pprof/threadcreate?debug=1" target="_blank">
+      <div class="card-header">
+        <span class="card-name">Threads</span>
+        <span class="card-tag tag-runtime">runtime</span>
+      </div>
+      <div class="card-desc">OS threads created by the process. Should stay low and stable for a daemon.</div>
+      <div class="card-cmd">go tool pprof HOST/debug/pprof/threadcreate</div>
+    </a>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-title">Raw endpoints</div>
+  <div class="raw-section" id="raw-links"></div>
+
+</main>
+
+<script>
+  const host = window.location.host;
+
+  // replace HOST in cmd examples
+  document.querySelectorAll('.card-cmd').forEach(el => {
+    el.textContent = el.textContent.replace('HOST', host);
+  });
+
+  // fetch daemon pid from /debug/pprof/
+  fetch('/debug/pprof/?debug=1')
+    .then(r => r.text())
+    .then(html => {
+      const m = html.match(/pid\s*=\s*(\d+)/i);
+      if (m) document.getElementById('pid').textContent = m[1];
+    })
+    .catch(() => {});
+
+  // raw links
+  const raw = [
+    ['/debug/pprof/',                    'index',       'full pprof index'],
+    ['/debug/pprof/cmdline',             'cmdline',     'process command line'],
+    ['/debug/pprof/symbol',              'symbol',      'symbol lookup'],
+  ];
+
+  const container = document.getElementById('raw-links');
+  raw.forEach(([href, name, desc]) => {
+    const a = document.createElement('a');
+    a.className = 'raw-link';
+    a.href = href;
+    a.target = '_blank';
+    a.innerHTML = `<span class="raw-link-name">${name}</span><span>${desc}</span>`;
+    container.appendChild(a);
+  });
+</script>
+
+</body>
+</html>

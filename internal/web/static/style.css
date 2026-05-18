@@ -455,3 +455,23 @@ section {
   color: var(--muted2);
   padding: 8px 0;
 }
+
+/* ── SEARCH ── */
+.search-input {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  outline: none;
+  width: 180px;
+  transition: border-color 0.15s;
+}
+
+.search-input::placeholder { color: var(--muted2); }
+
+.search-input:focus {
+  border-color: var(--muted);
+}

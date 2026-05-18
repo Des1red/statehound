@@ -50,6 +50,7 @@ func printHelp() {
 	fmt.Println("      --clear-events    clear statehound event log")
 	fmt.Println("      --hunt string     investigate a service, process, pid, or port")
 	fmt.Println("      --web             start web dashboard at http://127.0.0.1:7777")
+	fmt.Println("      --profile         start pprof profiling server at 127.0.0.1:6060")
 	fmt.Println("      --verbose         enable verbose output")
 }
 
@@ -152,4 +153,11 @@ func web() {
 		return
 	}
 	runtime.Web()
+}
+
+func profile() {
+	if !bootstrap.VerifyInstallation() {
+		return
+	}
+	runtime.Profile()
 }

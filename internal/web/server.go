@@ -2,16 +2,14 @@ package web
 
 import (
 	"fmt"
-	"net"
 	"net/http"
 
 	"statehound/internal/logger"
+	"statehound/internal/system"
 )
 
-const defaultPort = 7777
-
 func Start() {
-	port, fallback := findPort()
+	defaultPort, port, fallback := system.FindPort()
 	if port == 0 {
 		logger.Failed("failed to find available port", nil)
 		return
@@ -33,20 +31,4 @@ func Start() {
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		logger.Failed("web server error", err)
 	}
-}
-
-func findPort() (int, bool) {
-	ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", defaultPort))
-	if err == nil {
-		ln.Close()
-		return defaultPort, false
-	}
-
-	ln, err = net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		return 0, false
-	}
-	port := ln.Addr().(*net.TCPAddr).Port
-	ln.Close()
-	return port, true
 }

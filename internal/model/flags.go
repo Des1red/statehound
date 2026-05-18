@@ -24,6 +24,7 @@ type CLIFlags struct {
 
 	Web bool
 
+	Profile bool
 	Verbose bool // unused
 }
 

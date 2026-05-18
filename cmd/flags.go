@@ -36,6 +36,8 @@ func flags() model.Flags {
 
 	fs.BoolVar(&f.Runtime.Daemon, "daemon", false, "run statehound daemon")
 	fs.BoolVar(&f.Runtime.Notify, "notify", false, "run statehound desktop notifier")
+
+	fs.BoolVar(&f.CLI.Profile, "profile", false, "enable pprof profiling on 127.0.0.1:6060")
 	fs.BoolVar(&f.CLI.Verbose, "verbose", false, "enable verbose output")
 
 	_ = fs.Parse(os.Args[1:])
@@ -62,6 +64,9 @@ func handleFlags() {
 		statehoundd()
 	case f.Runtime.Notify:
 		notifier()
+
+	case f.CLI.Profile:
+		profile()
 
 	case f.CLI.Install:
 		install()
