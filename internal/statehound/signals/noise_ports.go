@@ -15,7 +15,7 @@ func isBrowserUDP(process, proto string) bool {
 	}
 
 	switch process {
-	case "firefox", "brave", "chrome", "chromium":
+	case "firefox", "firefox-esr", "brave", "chrome", "chromium":
 		return true
 	default:
 		return false
