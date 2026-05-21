@@ -18,6 +18,11 @@ func SendNotify(command string) (string, error) {
 	return SendTo(model.NotifySocketPath, command)
 }
 
+func IsNotifyRunning() bool {
+	resp, err := SendNotify("PING")
+	return err == nil && resp == "PONG"
+}
+
 func SendTo(path, command string) (string, error) {
 	conn, err := net.DialTimeout("unix", path, 2*time.Second)
 	if err != nil {

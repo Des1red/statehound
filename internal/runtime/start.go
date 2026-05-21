@@ -8,19 +8,25 @@ import (
 )
 
 func Start() {
-	if client.IsRunning() {
-		logger.Status("statehound is already running")
-		return
-	}
-
-	if err := command.Run("systemctl", "start", model.ServiceName); err != nil {
-		logger.Failed("failed to start statehound", err)
-		return
-	}
-
 	if !client.IsRunning() {
-		logger.Failed("statehound start command was sent, but daemon is not responding", nil)
-		return
+		if err := command.Run("systemctl", "start", model.ServiceName); err != nil {
+			logger.Failed("failed to start statehound daemon", err)
+			return
+		}
+
+		if !client.IsRunning() {
+			logger.Failed("statehound start command was sent, but daemon is not responding", nil)
+			return
+		}
+	} else {
+		logger.Status("statehound daemon is already running")
+	}
+
+	if err := command.Run("systemctl", "--user", "start", model.NotifierServiceName); err != nil {
+		logger.Warn("statehound notifier was not started")
+		logger.Warn(err.Error())
+	} else {
+		logger.Status("statehound notifier started")
 	}
 
 	logger.Success("statehound started")

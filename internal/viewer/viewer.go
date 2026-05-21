@@ -10,10 +10,11 @@ import (
 )
 
 func Show(urgency string) {
-	if !acquireLock() {
+	lockFile, ok := acquireLock()
+	if !ok {
 		return
 	}
-	defer releaseLock()
+	defer releaseLock(lockFile)
 
 	viewerMu.Lock()
 	if session != nil {
@@ -29,7 +30,11 @@ func Show(urgency string) {
 		logger.Failed("viewer: failed to start tabs", err)
 		return
 	}
-
+	defer func() {
+		if session == nil {
+			killTabs(tabSessions)
+		}
+	}()
 	time.Sleep(200 * time.Millisecond)
 
 	notebook, err := startNotebook(key, activeTabNum(urgency))
@@ -38,7 +43,7 @@ func Show(urgency string) {
 		logger.Failed("viewer: failed to start notebook", err)
 		return
 	}
-
+	go writeInitialLines(tabSessions)
 	updateCh := make(chan tabUpdate, 32)
 
 	info, err := os.Stat(model.EventPath)

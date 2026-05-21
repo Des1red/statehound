@@ -25,6 +25,20 @@ func startTabs(key int) (map[string]*tabSession, error) {
 	return tabSessions, nil
 }
 
+func writeInitialLines(tabSessions map[string]*tabSession) {
+	for _, t := range tabs {
+		tab, ok := tabSessions[t.urgency]
+		if !ok {
+			continue
+		}
+
+		lines := initialLines(t.urgency)
+		for _, line := range lines {
+			writeLine(tab.stdin, line)
+		}
+	}
+}
+
 func startTab(key int, t tabConfig) (*tabSession, error) {
 	cmd := exec.Command(
 		"yad",
@@ -45,11 +59,6 @@ func startTab(key int, t tabConfig) (*tabSession, error) {
 	if err := cmd.Start(); err != nil {
 		_ = stdin.Close()
 		return nil, fmt.Errorf("failed to start tab for %s: %w", t.urgency, err)
-	}
-
-	lines := initialLines(t.urgency)
-	for _, line := range lines {
-		writeLine(stdin, line)
 	}
 
 	return &tabSession{

@@ -1,28 +1,57 @@
 package viewer
 
 import (
+	"errors"
 	"os"
-	"strconv"
-	"strings"
+	"statehound/internal/logger"
 	"syscall"
 )
 
 const lockPath = "/tmp/statehound-viewer.lock"
 
-func acquireLock() bool {
-	data, err := os.ReadFile(lockPath)
-	if err == nil {
-		pid, err := strconv.Atoi(strings.TrimSpace(string(data)))
-		if err == nil && isAlive(pid) {
-			return false
-		}
-		os.Remove(lockPath)
+func acquireLock() (*os.File, bool) {
+	f, err := os.OpenFile(lockPath, os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		logger.Failed("viewer lock: failed to open lock file", err)
+		return nil, false
 	}
-	return os.WriteFile(lockPath, []byte(strconv.Itoa(os.Getpid())), 0644) == nil
+
+	err = syscall.Flock(int(f.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
+	if err != nil {
+		_ = f.Close()
+
+		if errors.Is(err, syscall.EWOULDBLOCK) {
+			logger.Status("viewer lock: already locked")
+			return nil, false
+		}
+
+		logger.Failed("viewer lock: failed to acquire lock", err)
+		return nil, false
+	}
+
+	logger.Status("viewer lock: acquired")
+	return f, true
 }
 
-func releaseLock() {
-	os.Remove(lockPath)
+func releaseLock(f *os.File) {
+	if f == nil {
+		return
+	}
+
+	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_UN); err != nil {
+		logger.Failed("viewer lock: failed to unlock", err)
+	}
+
+	if err := f.Close(); err != nil {
+		logger.Failed("viewer lock: failed to close lock file", err)
+	}
+
+	if err := os.Remove(lockPath); err != nil && !os.IsNotExist(err) {
+		logger.Failed("viewer lock: failed to remove lock file", err)
+		return
+	}
+
+	logger.Status("viewer lock: released")
 }
 
 func isAlive(pid int) bool {
